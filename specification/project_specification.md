@@ -1,4 +1,4 @@
-# RoadSense - Project requirements and specifications
+# RoadSense - requirements and specifications
 
 ## Requirements
 

@@ -1,0 +1,103 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0" version="24.7.17">
+  <diagram name="Page-1" id="kVt8Em_kQJLYtogck9mr">
+    <mxGraphModel dx="895" dy="696" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-4" target="aAlMACzFZfNFGqgNYUyu-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-4" value="Organization 1" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="800" width="140" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-1" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-4">
+          <mxGeometry x="20" y="40" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-2" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-4">
+          <mxGeometry x="20" y="80" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-3" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-4">
+          <mxGeometry x="20" y="120" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-6" value="&lt;font style=&quot;font-size: 25px;&quot;&gt;....&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=90;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-4">
+          <mxGeometry x="45" y="163" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-40" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-7" target="aAlMACzFZfNFGqgNYUyu-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-7" value="Organization 2" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="800" width="140" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-8" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-7">
+          <mxGeometry x="20" y="40" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-9" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-7">
+          <mxGeometry x="20" y="80" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-10" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-7">
+          <mxGeometry x="20" y="120" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-11" value="&lt;font style=&quot;font-size: 25px;&quot;&gt;....&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=90;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-7">
+          <mxGeometry x="45" y="163" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-12" target="aAlMACzFZfNFGqgNYUyu-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-12" value="Organization N" style="swimlane;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="800" width="140" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-13" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-12">
+          <mxGeometry x="20" y="40" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-14" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-12">
+          <mxGeometry x="20" y="80" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-15" value="RoadSense-IoT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-12">
+          <mxGeometry x="20" y="120" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-16" value="&lt;font style=&quot;font-size: 25px;&quot;&gt;....&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=90;" vertex="1" parent="aAlMACzFZfNFGqgNYUyu-12">
+          <mxGeometry x="45" y="163" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-17" value="&lt;font style=&quot;font-size: 25px;&quot;&gt;....&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=-180;" vertex="1" parent="1">
+          <mxGeometry x="490" y="890" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-28" target="aAlMACzFZfNFGqgNYUyu-50">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-28" value="Ticino gateway" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="528" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-29" value="&lt;div&gt;Other gateway&lt;br&gt;&lt;/div&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="530" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-34" target="aAlMACzFZfNFGqgNYUyu-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-34" target="aAlMACzFZfNFGqgNYUyu-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-34" target="aAlMACzFZfNFGqgNYUyu-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-34" value="INTERNET" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="95" y="710" width="630" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-50" value="&lt;div&gt;Apache Kafka&lt;/div&gt;&lt;div&gt;#1&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="440" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-53" target="aAlMACzFZfNFGqgNYUyu-28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-58" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="aAlMACzFZfNFGqgNYUyu-53" target="aAlMACzFZfNFGqgNYUyu-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-53" value="Geographical routing" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="227.5" y="630" width="365" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="aAlMACzFZfNFGqgNYUyu-62" value="Same as ticino!" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="510" y="490" width="100" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
