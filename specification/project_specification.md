@@ -13,6 +13,8 @@
     - [IoT Data Pipeline](#iot-data-pipeline)
     - [User Interaction Flow](#user-interaction-flow)
   - [Sensor Nodes](#sensor-nodes)
+    - [Requirements](#requirements-1)
+    - [RT-UML with State Charts](#rt-uml-with-state-charts)
     - [Hardware Components](#hardware-components)
     - [Firmware Development](#firmware-development)
     - [Data Processing and Noise Reduction](#data-processing-and-noise-reduction)
@@ -107,6 +109,35 @@ _Note_: The backend is designed with scalability in mind, utilizing distributed 
 4. **Feedback Loop**: Stakeholders can provide feedback on detected anomalies to improve system accuracy.
 
 ## Sensor Nodes
+
+### Requirements
+1. **Cost Restriction per node**: XXX CHF
+   - To keep cost of installation and parts low, one single node/sensor package will be installed in the drivers cabine.
+2. **Quantify felt RoadState for Driver**:
+   - Node has to be close to the driver and mounted securely to the chassis to minimize errors.
+   - Roadstate will be quantified in a range of 0 (very good) to 14 (very bad) with a value of 15 for hazardous condition.
+   - The road state is assigned for 3m of road at a time (reduce communication).
+3. **Adapt Quantification to different cars and driving states**:
+   - A simple linear Mass-Spring-Damper Model is chosen to model the cars factor on the transduced shocks. (While keeping computational effort low.)
+   - A first calibration phase coupled to a initial parameter set aims to fit Mass-Spring-Damper Model parameters.
+   - Measured data will be fit to quantified values during calibration phase.
+   - Further physical quatities other than z-axis acceleration have to be considered to decouple driving induced accelerations from the road state.
+4. **Sensing of physical quantities**:
+   1. **Acceleration in z-Axis** to determine road state and potholes. (Adapt pollingrate to vehicle velocity/ must be high enough)
+   2. **Acceleration in x,y-Axis and rotational acceleration** to minimize errors induced from driving scenarios.
+   3. **Driving Velocity** to coupple shock amplitudes to velocity (through Spring-Damper Model).
+   4. **Geographical Position** to reference qualification to current position.
+   5. **Driving Direction** to deduce road lane (use gps data).
+5. **Transmit Data at established Gatepoints**
+   1. Transmitted information Format:
+      - (Node ID (2 Byte)) | Position (2 * 4 Byte (SP)) | RoadState (0.5 Byte)   
+   2. Preprocess and save (Position, Quality)-Tuples locally on Node
+   3. Only save and transmit date every 3 meters
+   4. Automatically establish connection at gatepoints and transmit new gathered data
+   
+### RT-UML with State Charts
+
+![RT-UML](../assets/diagrams/edge_node_rtuml/edge_node_rtuml.svg)
 
 ### Hardware Components
 
