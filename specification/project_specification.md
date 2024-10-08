@@ -39,14 +39,16 @@ From the objectives outlined in the previous section, the team had identified th
 
 ## System design
 
-In this section the various components of the **RoadSense** system are described.
-
-### System components
+The **RoadSense** system consists of the following components:
 
 - **Sensor Nodes**: IoT devices installed in vehicles, responsible for collecting vibration data using an Inertial Measurement Unit (IMU) sensor and location data via a GPS module.
+
 - **Actuator Nodes**: Handle data transmission to the server and manage device power.
+
 - **Server-Side Application**: Collects, aggregates, and analyzes data from multiple devices, and visualizes road quality using heatmaps.
+
 - **Control Logic**: Defines the behavior of the IoT device in terms of data collection, processing, and communication.
+
 - **User Interface**: An interactive web application allowing stakeholders to visualize road conditions and manage alerts.
 
 ### Sensor Nodes
@@ -152,26 +154,33 @@ The **actuator nodes** are integrated within the sensor nodes, handling data tra
 
 ## System Architecture
 
-The **RoadSense system** consists of multiple IoT devices installed in vehicles, communicating with a central server designed to be highly scalable to handle data from thousands of devices.
+The **RoadSense** consists of multiple IoT devices installed in vehicles, communicating with a central server designed to be highly scalable to handle data from thousands of devices.
 
 #### IoT Data Pipeline
 
-1. **Data Acquisition**: Sensor nodes collect vibration and positional data using IMU and GPS modules.
-2. **On-Device Processing**: Apply noise reduction and adjust for the vehicle's baseline bumpiness using algorithms like Kalman filters.
-3. **Data Transmission**: Processed data is sent to the centralized server via Wi-Fi when in range of dedicated hotspots.
-4. **Data Ingestion**: The server receives data through a scalable, high-throughput data pipeline.
-5. **Data Aggregation and Analysis**: The server aggregates data from multiple devices, applying further filtering and analysis.
-6. **Data Storage**: An optimized database stores raw and processed data for efficient retrieval.
-7. **Visualization**: Generate heatmaps and overlay them on maps to display road bumpiness levels.
+The data pipeline has been designed with scalability in mind, allowing for efficient data collection, processing, and data analysis from multiple (potentially thousands) concurrent IoT devices. The following diagram illustrates the pipeline steps, from data ingestion to the storage of processed data.
 
-_Note_: The backend is designed with scalability in mind, utilizing distributed computing and cloud services to handle the influx of data from numerous IoT devices.
+![IoT Data Pipeline](../assets/diagrams/iot_data_pipeline/iot_data_pipeline.svg)
 
-#### User Interaction Flow
+The pipeline consists of the following components:
 
-1. **Data Visualization**: Stakeholders access the web interface to view the heatmap of road conditions.
-2. **Alert Management**: Users can view, acknowledge, and mark alerts as resolved.
-3. **Interactive Map**: Features like zooming, panning, and filtering by date or severity enhance usability.
-4. **Feedback Loop**: Stakeholders can provide feedback on detected anomalies to improve system accuracy.
+1. Data ingestion: IoT devices collect vibration, GPS, and other relevant data points. When the vehicle reaches an access point, the data will be transmitted to the server.
+
+2. Authentication and security: Each device is authenticated before data transmission to ensure data integrity and prevent unauthorized access. For this purpose, we chose to use [Keycloak](https://www.keycloak.org/) for identity and access management.
+
+3. Geographical distribution: The server leverages DNS-based load balancing to distribute incoming data across regional gateways for efficient processing. We have chosen to use [BIND9](https://www.isc.org/bind/) for DNS-based load balancing along with [GeoIP](https://www.maxmind.com/en/geoip2-databases) for geolocation.
+
+4. Message queues: Each gateway node processes incoming data and forwards it to a regional queuing system to allow for parallel processing. After evaluating multiple options, we decided to use [RabbitMQ](https://www.rabbitmq.com/) as the message queue system. To ensure high availability, we will deploy RabbitMQ in a cluster configuration (refer to the [RabbitMQ Clustering Guide](https://www.rabbitmq.com/clustering.html)).
+
+5. Data preprocessing: Each region has a set of preprocessing microservices that consume incoming data from the regional message queuing system, perform data validation, and run initial data processing tasks. These microservices are deployed using containerization technology like Docker and in a future production environment, managed by [Kubernetes](https://kubernetes.io/). Since we want to ensure high-performance data processing, and a small memory footprint, we chose to use [Go](https://golang.org/) as the primary language for these microservices.
+
+6. Data storage: Processed data is stored in a scalable database system that can handle high volumes of data. Since we are dealing with both date-time and geospatial data, we chose to use [TimescaleDB](https://www.timescale.com/) as the database system with the [PostGIS](https://postgis.net/) extension to support geospatial queries. To ensure data durability and high availability, we will deploy TimescaleDB in a clustered configuration.
+
+#### Client-Server Architecture
+
+This section describes the client-server architecture of the system, focusing on the interaction between the web application and the server-side components. The following diagram illustrates how the client (web browser) interacts with the server to load and visualize collected data:
+
+![Client-Server Architecture](../assets/diagrams/web_app_architecture/web_app_architecture.svg)
 
 ## Server-Side Application
 
