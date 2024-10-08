@@ -1,43 +1,45 @@
 # RoadSense - Requirements and Specifications
 
-## Overview
-
 The **RoadSense** project aims to develop an IoT-based system to detect and map road anomalies such as bumpiness and potholes. By installing sensor nodes on multiple vehicles, the system collects and analyzes road vibration data to create a detailed, interactive heatmap of road conditions. This information is invaluable for road maintenance planning, improving driver safety, and providing real-time alerts for hazardous conditions.
 
-## Team Members
-
-- **Luca Di Bello**
-- **Georg Mayer**
-- **Paolo Deidda**
+The team consists of three members: Luca Di Bello, Georg Mayer, and Paolo Deidda.
 
 ## Objectives
 
-- **Develop an Arduino-based IoT device** capable of detecting road vibrations and recording positional data.
-- **Implement noise reduction algorithms** to account for different vehicle baselines and reduce data inaccuracies.
-- **Enable data transmission** from the IoT device to a centralized server via Wi-Fi when in range of dedicated hotspots.
-- **Create a centralized server** to collect, aggregate, and analyze data from multiple devices.
-- **Visualize the data** by overlaying a heatmap on a map to display road bumpiness levels.
-- **Enhance data precision** by increasing the number of participating vehicles.
-- **Distinguish between different types of road anomalies** such as speed bumps, manholes, road markings, and potholes.
+This project aims to address the following objectives:
+
+1. Develop a cost-effective IoT-based system to detect and map road anomalies.
+2. Quantify road bumpiness levels and provide real-time alerts for hazardous conditions.
+3. Data transmission at established access points to reduce communication overhead.
+4. Centralized data management for efficient aggregation and analysis.
+5. User-friendly interface for stakeholders to visualize road conditions and manage alerts.
+6. Improve the accuracy of road conditons by using multiple vehicles for data collection.
 
 ## Requirements
 
-- **Up-to-Date Road Map**: Create an interactive map with detailed information on road bumpiness and hazards.
-- **Visualization**: Display road conditions through a heatmap overlay, highlighting areas with significant anomalies.
-- **Interactivity**: Allow stakeholders to engage with the map, view alerts, and mark issues as resolved.
-- **Anomaly Differentiation**: Distinguish between various road features like speed bumps, potholes, and manholes.
-- **Data Collection**: Rely on multiple vehicles for comprehensive data and enhanced accuracy.
-- **Scalability**: Design a cost-effective solution suitable for widespread adoption.
-- **Centralized Data Management**: Use a server to collect, aggregate, and analyze data from all devices.
-- **Optimized Data Transmission**: Ensure efficient communication between IoT devices and the server.
-- **Noise Reduction**: Implement algorithms to minimize inaccuracies due to different vehicle characteristics.
-- **Intermittent Connectivity**: Transmit data via Wi-Fi when in range, storing data locally when not connected.
-- **Power Supply**:
-  - **Primary**: Utilize the vehicle's power source.
-  - **Backup**: Include a battery to maintain operation when the vehicle is off.
-- **Durable Casing**: Securely enclose all components, protect against external elements, and include status LEDs.
+From the objectives outlined in the previous section, the team had identified the following requirements for the **RoadSense** project:
+
+- **Road heatmap**: Create an interactive web application that displays road conditions using a heatmap overlay (lighter colors for smoother roads, darker colors for rougher roads).
+
+- **Alerting system**: The system should automatically create alerts when hazardous road conditions are detected and allow users to view, acknowledge, and resolve these alerts. Users should be also able to manually add alerts on the map.
+
+- **Anomaly Differentiation**: Distinguish between normal road features (i.e. speed bumps, potholes, manholes, etc) and hazardous road conditions.
+
+- **Continuous system calibration**: Each IoT device should be calibrated to the vehicle it is installed in, taking into account the vehicle's characteristics and driving conditions. This calibration should be simple and possibly automatically. This can be archieved by a first calibration phase coupled to an initial parameter set.
+
+- **Scalability**: The system should be highly scalable to potentially handle data from thousands of vehicles simultaneously.
+
+- **Centralized Data Management**: The server should be able to aggregate data from multiple IoT devices and store it efficiently for later analysis and visualization.
+
+- **Optimized Data Transmission**: Since continuous data transmission can be costly for the user, the system should transmit data only when the vehicle is at established access points (e.g., Wi-Fi hotspots).
+
+- **Power Supply**: The system should be designed to operate using the vehicle's power source primarily, with a small backup battery to ensure that the data transmission is not interrupted if the vehicle is turned off.
+
+- **Durable Casing**: The sensor nodes should be robust and weatherproof to withstand various driving conditions.
 
 ## System design
+
+In this section the various components of the **RoadSense** system are described.
 
 ### System components
 
