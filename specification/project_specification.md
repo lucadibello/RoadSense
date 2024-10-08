@@ -194,49 +194,6 @@ The pipeline consists of the following components:
 
 5. **Database cluster**: API workers connect to the database cluster containing the aggregated IoT data, allowing them to retrieve the necessary information for the client requests.
 
-### Visualization
-
-- **Web Interface**:
-  - Develop a responsive web application for data visualization.
-  - Integrate mapping APIs like Google Maps or OpenStreetMap.
-- **Heatmap Generation**:
-  - Calculate bumpiness scores for road segments.
-  - Overlay heatmaps on the map interface.
-- **Interactive Features**:
-  - Enable filtering by time ranges, severity levels, or specific areas.
-  - Provide statistical summaries and trends.
-- **User Engagement**:
-  - Allow stakeholders to add comments or additional data.
-
-## Control Logic
-
-- **Data Collection**:
-  - Continuously collect IMU and GPS data when the vehicle is in motion.
-- **Data Processing**:
-  - Apply noise reduction and baseline adjustments in real-time.
-- **Communication**:
-  - Transmit data to the server when connectivity is available.
-  - Implement retry mechanisms for failed transmissions.
-- **Power Management**:
-  - Switch between power sources as needed.
-  - Enter low-power modes when idle.
-- **Error Handling**:
-  - Monitor system health and report errors to the server.
-  - Indicate status through LEDs on the device casing.
-
-## Testing and Validation
-
-- **Field Testing**:
-  - Install devices in various vehicle types (sedans, SUVs, trucks).
-  - Collect data over different road conditions (urban, rural, highways).
-- **Algorithm Tuning**:
-  - Adjust filtering parameters based on test results.
-  - Validate bumpiness scores against known road conditions.
-- **User Feedback**:
-  - Gather feedback from stakeholders to improve system accuracy and usability.
-- **Simulation**:
-  - Use simulated data to test the system under various scenarios.
-
 ## Possible Problems and Solutions
 
 ### Network Connectivity
