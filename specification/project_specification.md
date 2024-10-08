@@ -17,31 +17,31 @@ This project aims to address the following objectives:
 
 From the objectives outlined in the previous section, the team had identified the following requirements for the **RoadSense** project:
 
-- **Road heatmap**: Create an interactive web application that displays road conditions using a heatmap overlay (lighter colors for smoother roads, darker colors for rougher roads).
+1. **Road heatmap**: Create an interactive web application that displays road conditions using a heatmap overlay (lighter colors for smoother roads, darker colors for rougher roads).
 
-- **Alerting system**: The system should automatically create alerts when hazardous road conditions are detected and allow users to view, acknowledge, and resolve these alerts. Users should be also able to manually add alerts on the map.
+2. **Alerting system**: The system should automatically create alerts when hazardous road conditions are detected and allow users to view, acknowledge, and resolve these alerts. Users should be also able to manually add alerts on the map.
 
-- **Anomaly Differentiation**: Distinguish between normal road features (i.e. speed bumps, potholes, manholes, etc) and hazardous road conditions.
+3. **Anomaly Differentiation**: Distinguish between normal road features (i.e. speed bumps, potholes, manholes, etc) and hazardous road conditions.
 
-- **Road network coverage**: To achieve an extensive coverage of the road network and minimize discrepancies between single measurements an actual road state a swarm of sensor nodes installed in different cars is needed. Untilization of vehicles owned by public services (i.e. buses, dump trucks, etc.) can be utilized as well as vehicles of private volunteers. Further offers to businesses with large car fleets (i.e. Taxi companies, Ride Share companies, etc.) can be made to further increase measuring devices.
+4. **Road network coverage**: To achieve an extensive coverage of the road network and minimize discrepancies between single measurements an actual road state a swarm of sensor nodes installed in different cars is needed. Untilization of vehicles owned by public services (i.e. buses, dump trucks, etc.) can be utilized as well as vehicles of private volunteers. Further offers to businesses with large car fleets (i.e. Taxi companies, Ride Share companies, etc.) can be made to further increase measuring devices.
 
-- **Continuous system calibration**: Each IoT device should be calibrated to the vehicle it is installed in, taking into account the vehicle's characteristics and driving conditions. This calibration should be simple and possibly automatically. This can be archieved by a first calibration phase coupled to an initial parameter set.
+5. **Continuous system calibration**: Each IoT device should be calibrated to the vehicle it is installed in, taking into account the vehicle's characteristics and driving conditions. This calibration should be simple and possibly automatically. This can be archieved by a first calibration phase coupled to an initial parameter set.
 
-- **Scalability**: The system should be highly scalable to potentially handle data from thousands of vehicles simultaneously.
+6. **Scalability**: The system should be highly scalable to potentially handle data from thousands of vehicles simultaneously.
 
-- **Centralized Data Management**: The server should be able to aggregate data from multiple IoT devices and store it efficiently for later analysis and visualization.
+7. **Centralized Data Management**: The server should be able to aggregate data from multiple IoT devices and store it efficiently for later analysis and visualization.
 
-- **Optimized Data Transmission**: Since continuous data transmission can be costly for the user, the system should transmit data only when the vehicle is at established access points (e.g., Wi-Fi hotspots).
+8. **Optimized Data Transmission**: Since continuous data transmission can be costly for the user, the system should transmit data only when the vehicle is at established access points (e.g., Wi-Fi hotspots).
 
-- **Power Supply**: The systems should be designed to operate using the vehicle's power source primarily, with a small backup battery to ensure that the data transmission is not interrupted if the vehicle is turned off.
+9. **Power Supply**: The systems should be designed to operate using the vehicle's power source primarily, with a small backup battery to ensure that the data transmission is not interrupted if the vehicle is turned off.
 
-- **Durability**: The sensor nodes should be robust and weatherproof to withstand various driving conditions to minimize effort and cost of maintenance for the end user.
+10. **Durability**: The sensor nodes should be robust and weatherproof to withstand various driving conditions to minimize effort and cost of maintenance for the end user.
 
 ## System design
 
 The **RoadSense** system consists of the following components:
 
-- **Sensor Nodes**: IoT devices installed in vehicles, responsible for collecting inertial data using an Inertial Measurement Unit (IMU) sensor and location data via a GPS module. These nodes should already compute a qualifier for localized road states to minimize data traffic to centralized hubs. 
+- **Sensor Nodes**: IoT devices installed in vehicles, responsible for collecting inertial data using an Inertial Measurement Unit (IMU) sensor and location data via a GPS module. These nodes should already compute a qualifier for localized road states to minimize data traffic to centralized hubs.
 
 - **Server-Side Application**: Collects, aggregates, and analyzes data from multiple devices, and visualizes road quality using heatmaps.
 
