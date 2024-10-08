@@ -164,17 +164,17 @@ The data pipeline has been designed with scalability in mind, allowing for effic
 
 The pipeline consists of the following components:
 
-1. Data ingestion: IoT devices collect vibration, GPS, and other relevant data points. When the vehicle reaches an access point, the data will be transmitted to the server.
+1. **Data ingestion**: IoT devices collect vibration, GPS, and other relevant data points. When the vehicle reaches an access point, the data will be transmitted to the server.
 
-2. Authentication and security: Each device is authenticated before data transmission to ensure data integrity and prevent unauthorized access. For this purpose, we chose to use [Keycloak](https://www.keycloak.org/) for identity and access management.
+2. **Authentication and security**: Each device is authenticated before data transmission to ensure data integrity and prevent unauthorized access. For this purpose, we chose to use [Keycloak](https://www.keycloak.org/) for identity and access management.
 
-3. Geographical distribution: The server leverages DNS-based load balancing to distribute incoming data across regional gateways for efficient processing. We have chosen to use [BIND9](https://www.isc.org/bind/) for DNS-based load balancing along with [GeoIP](https://www.maxmind.com/en/geoip2-databases) for geolocation.
+3. **Geographical distribution**: The server leverages DNS-based load balancing to distribute incoming data across regional gateways for efficient processing. We have chosen to use [BIND9](https://www.isc.org/bind/) for DNS-based load balancing along with [GeoIP](https://www.maxmind.com/en/geoip2-databases) for geolocation. Each regional gateway will be responsible for routing the user requests to the regional message queuing system. For this purpose, we will use [Traefik](https://traefik.io/) as the reverse proxy.
 
-4. Message queues: Each gateway node processes incoming data and forwards it to a regional queuing system to allow for parallel processing. After evaluating multiple options, we decided to use [RabbitMQ](https://www.rabbitmq.com/) as the message queue system. To ensure high availability, we will deploy RabbitMQ in a cluster configuration (refer to the [RabbitMQ Clustering Guide](https://www.rabbitmq.com/clustering.html)).
+4. **Message queues**: Each gateway node processes incoming data and forwards it to a regional queuing system to allow for parallel processing. After evaluating multiple options, we decided to use [RabbitMQ](https://www.rabbitmq.com/) as the message queue system. To ensure high availability, we will deploy RabbitMQ in a cluster configuration (refer to the [RabbitMQ Clustering Guide](https://www.rabbitmq.com/clustering.html)).
 
-5. Data preprocessing: Each region has a set of preprocessing microservices that consume incoming data from the regional message queuing system, perform data validation, and run initial data processing tasks. These microservices are deployed using containerization technology like Docker and in a future production environment, managed by [Kubernetes](https://kubernetes.io/). Since we want to ensure high-performance data processing, and a small memory footprint, we chose to use [Go](https://golang.org/) as the primary language for these microservices.
+5. **Data preprocessing**: Each region has a set of preprocessing microservices that consume incoming data from the regional message queuing system, perform data validation, and run initial data processing tasks. These microservices are deployed using containerization technology like Docker and in a future production environment, managed by [Kubernetes](https://kubernetes.io/). Since we want to ensure high-performance data processing, and a small memory footprint, we chose to use [Go](https://golang.org/) as the primary language for these microservices.
 
-6. Data storage: Processed data is stored in a scalable database system that can handle high volumes of data. Since we are dealing with both date-time and geospatial data, we chose to use [TimescaleDB](https://www.timescale.com/) as the database system with the [PostGIS](https://postgis.net/) extension to support geospatial queries. To ensure data durability and high availability, we will deploy TimescaleDB in a clustered configuration.
+6. **Data storage**: Processed data is stored in a scalable database system that can handle high volumes of data. Since we are dealing with both date-time and geospatial data, we chose to use [TimescaleDB](https://www.timescale.com/) as the database system with the [PostGIS](https://postgis.net/) extension to support geospatial queries. To ensure data durability and high availability, we will deploy TimescaleDB in a clustered configuration.
 
 #### Client-Server Architecture
 
@@ -182,40 +182,17 @@ This section describes the client-server architecture of the system, focusing on
 
 ![Client-Server Architecture](../assets/diagrams/web_app_architecture/web_app_architecture.svg)
 
-## Server-Side Application
+The pipeline consists of the following components:
 
-### API Development
+1. **Clients**: The application users (agents or web browsers) interact with the web application to view road conditions, manage alerts, and access other features.
 
-- **RESTful APIs**:
-  - For data ingestion from IoT devices.
-  - For data retrieval by the web interface.
-- **Authentication and Security**:
-  - Implement token-based authentication.
-  - Secure data transmission with HTTPS.
-- **Rate Limiting**:
-  - Prevent server overload by controlling the rate of incoming requests.
+2. **Authentication**: To manage user access and permissions, users need to authenticate themselves. For this purpose, we will use the same instance of [Keycloak](https://www.keycloak.org/) that is used for IoT device authentication. To have a greater division between IoT devices and users, we will employ different realms in Keycloak (refer to the [Keycloak Documentation](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms)).
 
-### Database Design
+3. **Geographical distribution**: API requests are routed to the regional API gateways using DNS-based load balancing. We will use the same [BIND9](https://www.isc.org/bind/) + [GeoIP](https://www.maxmind.com/en/geoip2-databases) + [Traefik](https://traefik.io/) setup as described in the IoT data pipeline section.
 
-- **Data Storage**:
-  - Use scalable databases like PostgreSQL or MongoDB.
-  - Define schemas for raw sensor data, processed data, and aggregated results.
-- **Spatial Indexing**:
-  - Utilize geospatial indexing for efficient geographical queries.
-- **Optimization**:
-  - Optimize queries for real-time data access and analysis.
+4. **API Workers**: Each region has a set of API worker microservices that will handle incoming API requests, query the database, and return the requested data to the client. These microservices will be deployed using containerization technology like Docker and managed by [Kubernetes](https://kubernetes.io/) in a future production environment. Furthermore, they will be developed using [Go](https://golang.org/) to enhance the application performance.
 
-### Data Aggregation and Analysis
-
-- **Data Processing Pipeline**:
-  - Aggregate data from multiple devices.
-  - Apply further filtering and anomaly detection.
-- **Scalability**:
-  - Design the backend to handle high volumes of data.
-  - Use message queues and microservices architecture.
-- **Analysis Techniques**:
-  - Machine learning algorithms to improve anomaly detection.
-  - Predictive analytics for road degradation.
+5. **Database cluster**: API workers connect to the database cluster containing the aggregated IoT data, allowing them to retrieve the necessary information for the client requests.
 
 ### Visualization
 
