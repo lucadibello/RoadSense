@@ -2,7 +2,7 @@
 
 The **RoadSense** project aims to develop an IoT-based system to detect and map road anomalies such as bumpiness and potholes. By installing sensor nodes on multiple vehicles, the system collects and analyzes road vibration data to create a detailed, interactive heatmap of road conditions. This information is invaluable for road maintenance planning, improving driver safety, and providing real-time alerts for hazardous conditions.
 
-The team consists of three members: Luca Di Bello, Georg Mayer, and Paolo Deidda.
+The team consists of three members: Luca Di Bello, Georg Meyer, and Paolo Deidda.
 
 ## Objectives
 
@@ -10,10 +10,8 @@ This project aims to address the following objectives:
 
 1. Develop a cost-effective IoT-based system to detect and map road anomalies.
 2. Quantify road bumpiness levels and provide real-time alerts for hazardous conditions.
-3. Data transmission at established access points to reduce communication overhead.
-4. Centralized data management for efficient aggregation and analysis.
-5. User-friendly interface for stakeholders to visualize road conditions and manage alerts.
-6. Improve the accuracy of road conditons by using multiple vehicles for data collection.
+3. User-friendly interface for stakeholders to visualize road conditions and manage alerts.
+4. Improve the accuracy of road conditons by using multiple vehicles for data collection.
 
 ## Requirements
 
@@ -25,6 +23,8 @@ From the objectives outlined in the previous section, the team had identified th
 
 - **Anomaly Differentiation**: Distinguish between normal road features (i.e. speed bumps, potholes, manholes, etc) and hazardous road conditions.
 
+- **Road network coverage**: To achieve an extensive coverage of the road network and minimize discrepancies between single measurements an actual road state a swarm of sensor nodes installed in different cars is needed. Untilization of vehicles owned by public services (i.e. buses, dump trucks, etc.) can be utilized as well as vehicles of private volunteers. Further offers to businesses with large car fleets (i.e. Taxi companies, Ride Share companies, etc.) can be made to further increase measuring devices.
+
 - **Continuous system calibration**: Each IoT device should be calibrated to the vehicle it is installed in, taking into account the vehicle's characteristics and driving conditions. This calibration should be simple and possibly automatically. This can be archieved by a first calibration phase coupled to an initial parameter set.
 
 - **Scalability**: The system should be highly scalable to potentially handle data from thousands of vehicles simultaneously.
@@ -33,17 +33,15 @@ From the objectives outlined in the previous section, the team had identified th
 
 - **Optimized Data Transmission**: Since continuous data transmission can be costly for the user, the system should transmit data only when the vehicle is at established access points (e.g., Wi-Fi hotspots).
 
-- **Power Supply**: The system should be designed to operate using the vehicle's power source primarily, with a small backup battery to ensure that the data transmission is not interrupted if the vehicle is turned off.
+- **Power Supply**: The systems should be designed to operate using the vehicle's power source primarily, with a small backup battery to ensure that the data transmission is not interrupted if the vehicle is turned off.
 
-- **Durable Casing**: The sensor nodes should be robust and weatherproof to withstand various driving conditions.
+- **Durability**: The sensor nodes should be robust and weatherproof to withstand various driving conditions to minimize effort and cost of maintenance for the end user.
 
 ## System design
 
 The **RoadSense** system consists of the following components:
 
-- **Sensor Nodes**: IoT devices installed in vehicles, responsible for collecting vibration data using an Inertial Measurement Unit (IMU) sensor and location data via a GPS module.
-
-- **Actuator Nodes**: Handle data transmission to the server and manage device power.
+- **Sensor Nodes**: IoT devices installed in vehicles, responsible for collecting inertial data using an Inertial Measurement Unit (IMU) sensor and location data via a GPS module. These nodes should already compute a qualifier for localized road states to minimize data traffic to centralized hubs. 
 
 - **Server-Side Application**: Collects, aggregates, and analyzes data from multiple devices, and visualizes road quality using heatmaps.
 
@@ -51,39 +49,39 @@ The **RoadSense** system consists of the following components:
 
 - **User Interface**: An interactive web application allowing stakeholders to visualize road conditions and manage alerts.
 
-### Sensor Nodes
+## Sensor Nodes
 
-#### Requirements
+### Specifications
 
-1. **Cost Restriction per node**: XXX CHF
-   - To keep cost of installation and parts low, one single node/sensor package will be installed in the drivers cabine.
-2. **Quantify felt RoadState for Driver**:
-   - Node has to be close to the driver and mounted securely to the chassis to minimize errors.
+1. **Cost Restriction per node**: ~100 CHF
+   - As the number of vehicles the nodes will be high, th cost per node needs to be as small possible. To keep cost of installation and parts low, one single node/sensor package will be installed inside the vehicle.
+2. **Quantify felt RoadState**:
+   - The node is idealy placed centraly in the car, above one of the axles and mounted securely to the chassis to minimize errors.
    - Roadstate will be quantified in a range of 0 (very good) to 14 (very bad) with a value of 15 for hazardous condition.
-   - The road state is assigned for 3m of road at a time (reduce communication).
 3. **Adapt Quantification to different cars and driving states**:
    - A simple linear Mass-Spring-Damper Model is chosen to model the cars factor on the transduced shocks. (While keeping computational effort low.)
    - A first calibration phase coupled to a initial parameter set aims to fit Mass-Spring-Damper Model parameters.
    - Measured data will be fit to quantified values during calibration phase.
    - Further physical quatities other than z-axis acceleration have to be considered to decouple driving induced accelerations from the road state.
-4. **Sensing of physical quantities**:
+4. **High Polling rate of IMU measurements**:
+   - As shocks induced by road bumps have a very short period, where the period and amplitude of the induced acceleration is proportional to vehicle speed. The polling rate needs to be chosen high enough to ensure reliable sensor readings for road specific driving speeds.
+5. **Sensing of physical quantities**:
    1. **Acceleration in z-Axis** to determine road state and potholes. (Adapt pollingrate to vehicle velocity/ must be high enough)
    2. **Acceleration in x,y-Axis and rotational acceleration** to minimize errors induced from driving scenarios.
-   3. **Driving Velocity** to coupple shock amplitudes to velocity (through Spring-Damper Model).
+   3. **Driving Velocity** to couple shock amplitudes to velocity (through Spring-Damper Model).
    4. **Geographical Position** to reference qualification to current position.
    5. **Driving Direction** to deduce road lane (use gps data).
-5. **Transmit Data at established Gatepoints**
+6. **Transmit Data at established Gatepoints**
    1. Transmitted information Format:
-      - (Node ID (2 Byte)) | Position (2 \* 4 Byte (SP)) | RoadState (0.5 Byte)
+      - (Node ID (2 Byte)) | Position (2 \* 4 Byte (SP FP)) | RoadState (0.5 Byte)
    2. Preprocess and save (Position, Quality)-Tuples locally on Node
-   3. Only save and transmit date every 3 meters
-   4. Automatically establish connection at gatepoints and transmit new gathered data
+   3. Automatically establish connection at gatepoints and transmit new gathered data
 
-#### RT-UML with State Charts
+### RT-UML with State Charts
 
-![RT-UML](../assets/diagrams/edge_node_rtuml/edge_node_rtuml.svg)
+![RT-UML of a Sensor Node](../assets/diagrams/edge_node_rtuml/edge_node_rtuml.svg)
 
-#### Hardware Components
+### Hardware Components
 
 1. **Microcontroller**:
    - **Arduino Nano 33 IoT** or similar with built-in Wi-Fi capability.
@@ -99,12 +97,12 @@ The **RoadSense** system consists of the following components:
 6. **Connectivity**:
    - Wi-Fi module (if not integrated) like **ESP8266** or **ESP32**.
 
-#### Firmware Development
+### Firmware Development
 
 - **Sensor Calibration**:
-  - Implement routines to calibrate the IMU sensor for accurate readings.
+  - Implement routines to calibrate measurements/models from the IMU sensor for accurate readings.
 - **Data Sampling**:
-  - Sample sensor data at appropriate intervals (e.g., 50 Hz).
+  - Sample sensor data at appropriate intervals fitting to vehicle speed (e.g., 50 Hz).
 - **Noise Reduction**:
   - Apply Kalman Filter or Complementary Filter to fuse sensor data.
   - Use moving averages or median filters to smooth out transient spikes.
@@ -123,7 +121,7 @@ The **RoadSense** system consists of the following components:
   - Monitor power source and switch between vehicle power and backup battery as needed.
   - Implement sleep modes when the vehicle is not in motion.
 
-#### Data Processing and Noise Reduction
+### Data Processing and Noise Reduction
 
 - **Calibration Period**:
   - Collect initial data to establish the vehicle's baseline vibration patterns.
@@ -140,17 +138,6 @@ The **RoadSense** system consists of the following components:
   - **Data Compression**: Reduce data size by transmitting only significant events.
   - **Event Detection**: Implement on-device logic to detect and report anomalies.
   - **Power Efficiency**: Optimize code to reduce processor load and conserve battery life.
-
-### Actuator Nodes
-
-The **actuator nodes** are integrated within the sensor nodes, handling data transmission and power management:
-
-- **Data Transmission**:
-  - Manage communication protocols and ensure secure data transfer to the server.
-  - Queue data for transmission when connectivity is unavailable.
-- **Power Management**:
-  - Switch between vehicle power and backup battery seamlessly.
-  - Monitor battery levels and optimize power consumption.
 
 ## System Architecture
 
