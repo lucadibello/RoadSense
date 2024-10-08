@@ -1,41 +1,5 @@
 # RoadSense - Requirements and Specifications
 
-<!--toc:start-->
-
-- [RoadSense - Requirements and Specifications](#roadsense---requirements-and-specifications)
-  - [Overview](#overview)
-  - [Team Members](#team-members)
-  - [Objectives](#objectives)
-  - [Requirements](#requirements)
-  - [High-Level Specification](#high-level-specification)
-    - [System Components](#system-components)
-  - [System Architecture](#system-architecture)
-    - [IoT Data Pipeline](#iot-data-pipeline)
-    - [User Interaction Flow](#user-interaction-flow)
-  - [Sensor Nodes](#sensor-nodes)
-    - [Requirements](#requirements-1)
-    - [RT-UML with State Charts](#rt-uml-with-state-charts)
-    - [Hardware Components](#hardware-components)
-    - [Firmware Development](#firmware-development)
-    - [Data Processing and Noise Reduction](#data-processing-and-noise-reduction)
-  - [Actuator Nodes](#actuator-nodes)
-  - [Server-Side Application](#server-side-application)
-    - [API Development](#api-development)
-    - [Database Design](#database-design)
-    - [Data Aggregation and Analysis](#data-aggregation-and-analysis)
-    - [Visualization](#visualization)
-  - [Control Logic](#control-logic)
-  - [Testing and Validation](#testing-and-validation)
-  - [Possible Problems and Solutions](#possible-problems-and-solutions)
-    - [Network Connectivity](#network-connectivity)
-    - [Vehicle Variability](#vehicle-variability)
-    - [Power Management](#power-management)
-    - [Data Volume Management](#data-volume-management)
-  - [Possible Enhancements](#possible-enhancements)
-  - [Scalability and Backend Design](#scalability-and-backend-design)
-
-<!--toc:end-->
-
 ## Overview
 
 The **RoadSense** project aims to develop an IoT-based system to detect and map road anomalies such as bumpiness and potholes. By installing sensor nodes on multiple vehicles, the system collects and analyzes road vibration data to create a detailed, interactive heatmap of road conditions. This information is invaluable for road maintenance planning, improving driver safety, and providing real-time alerts for hazardous conditions.
@@ -73,11 +37,9 @@ The **RoadSense** project aims to develop an IoT-based system to detect and map 
   - **Backup**: Include a battery to maintain operation when the vehicle is off.
 - **Durable Casing**: Securely enclose all components, protect against external elements, and include status LEDs.
 
-## High-Level Specification
+## System design
 
-The **RoadSense system** will detect road anomalies through IoT devices installed in multiple vehicles. The collected data will be transmitted to a centralized server that processes, aggregates, and visualizes it on an interactive map. The heatmap will provide stakeholders with an overview of road conditions, allowing them to focus on specific road segments for maintenance.
-
-### System Components
+### System components
 
 - **Sensor Nodes**: IoT devices installed in vehicles, responsible for collecting vibration data using an Inertial Measurement Unit (IMU) sensor and location data via a GPS module.
 - **Actuator Nodes**: Handle data transmission to the server and manage device power.
@@ -85,32 +47,10 @@ The **RoadSense system** will detect road anomalies through IoT devices installe
 - **Control Logic**: Defines the behavior of the IoT device in terms of data collection, processing, and communication.
 - **User Interface**: An interactive web application allowing stakeholders to visualize road conditions and manage alerts.
 
-## System Architecture
+### Sensor Nodes
 
-The **RoadSense system** consists of multiple IoT devices installed in vehicles, communicating with a central server designed to be highly scalable to handle data from thousands of devices.
+#### Requirements
 
-### IoT Data Pipeline
-
-1. **Data Acquisition**: Sensor nodes collect vibration and positional data using IMU and GPS modules.
-2. **On-Device Processing**: Apply noise reduction and adjust for the vehicle's baseline bumpiness using algorithms like Kalman filters.
-3. **Data Transmission**: Processed data is sent to the centralized server via Wi-Fi when in range of dedicated hotspots.
-4. **Data Ingestion**: The server receives data through a scalable, high-throughput data pipeline.
-5. **Data Aggregation and Analysis**: The server aggregates data from multiple devices, applying further filtering and analysis.
-6. **Data Storage**: An optimized database stores raw and processed data for efficient retrieval.
-7. **Visualization**: Generate heatmaps and overlay them on maps to display road bumpiness levels.
-
-_Note_: The backend is designed with scalability in mind, utilizing distributed computing and cloud services to handle the influx of data from numerous IoT devices.
-
-### User Interaction Flow
-
-1. **Data Visualization**: Stakeholders access the web interface to view the heatmap of road conditions.
-2. **Alert Management**: Users can view, acknowledge, and mark alerts as resolved.
-3. **Interactive Map**: Features like zooming, panning, and filtering by date or severity enhance usability.
-4. **Feedback Loop**: Stakeholders can provide feedback on detected anomalies to improve system accuracy.
-
-## Sensor Nodes
-
-### Requirements
 1. **Cost Restriction per node**: XXX CHF
    - To keep cost of installation and parts low, one single node/sensor package will be installed in the drivers cabine.
 2. **Quantify felt RoadState for Driver**:
@@ -130,16 +70,16 @@ _Note_: The backend is designed with scalability in mind, utilizing distributed 
    5. **Driving Direction** to deduce road lane (use gps data).
 5. **Transmit Data at established Gatepoints**
    1. Transmitted information Format:
-      - (Node ID (2 Byte)) | Position (2 * 4 Byte (SP)) | RoadState (0.5 Byte)   
+      - (Node ID (2 Byte)) | Position (2 \* 4 Byte (SP)) | RoadState (0.5 Byte)
    2. Preprocess and save (Position, Quality)-Tuples locally on Node
    3. Only save and transmit date every 3 meters
    4. Automatically establish connection at gatepoints and transmit new gathered data
-   
-### RT-UML with State Charts
+
+#### RT-UML with State Charts
 
 ![RT-UML](../assets/diagrams/edge_node_rtuml/edge_node_rtuml.svg)
 
-### Hardware Components
+#### Hardware Components
 
 1. **Microcontroller**:
    - **Arduino Nano 33 IoT** or similar with built-in Wi-Fi capability.
@@ -155,7 +95,7 @@ _Note_: The backend is designed with scalability in mind, utilizing distributed 
 6. **Connectivity**:
    - Wi-Fi module (if not integrated) like **ESP8266** or **ESP32**.
 
-### Firmware Development
+#### Firmware Development
 
 - **Sensor Calibration**:
   - Implement routines to calibrate the IMU sensor for accurate readings.
@@ -179,7 +119,7 @@ _Note_: The backend is designed with scalability in mind, utilizing distributed 
   - Monitor power source and switch between vehicle power and backup battery as needed.
   - Implement sleep modes when the vehicle is not in motion.
 
-### Data Processing and Noise Reduction
+#### Data Processing and Noise Reduction
 
 - **Calibration Period**:
   - Collect initial data to establish the vehicle's baseline vibration patterns.
@@ -197,7 +137,7 @@ _Note_: The backend is designed with scalability in mind, utilizing distributed 
   - **Event Detection**: Implement on-device logic to detect and report anomalies.
   - **Power Efficiency**: Optimize code to reduce processor load and conserve battery life.
 
-## Actuator Nodes
+### Actuator Nodes
 
 The **actuator nodes** are integrated within the sensor nodes, handling data transmission and power management:
 
@@ -207,6 +147,29 @@ The **actuator nodes** are integrated within the sensor nodes, handling data tra
 - **Power Management**:
   - Switch between vehicle power and backup battery seamlessly.
   - Monitor battery levels and optimize power consumption.
+
+## System Architecture
+
+The **RoadSense system** consists of multiple IoT devices installed in vehicles, communicating with a central server designed to be highly scalable to handle data from thousands of devices.
+
+#### IoT Data Pipeline
+
+1. **Data Acquisition**: Sensor nodes collect vibration and positional data using IMU and GPS modules.
+2. **On-Device Processing**: Apply noise reduction and adjust for the vehicle's baseline bumpiness using algorithms like Kalman filters.
+3. **Data Transmission**: Processed data is sent to the centralized server via Wi-Fi when in range of dedicated hotspots.
+4. **Data Ingestion**: The server receives data through a scalable, high-throughput data pipeline.
+5. **Data Aggregation and Analysis**: The server aggregates data from multiple devices, applying further filtering and analysis.
+6. **Data Storage**: An optimized database stores raw and processed data for efficient retrieval.
+7. **Visualization**: Generate heatmaps and overlay them on maps to display road bumpiness levels.
+
+_Note_: The backend is designed with scalability in mind, utilizing distributed computing and cloud services to handle the influx of data from numerous IoT devices.
+
+#### User Interaction Flow
+
+1. **Data Visualization**: Stakeholders access the web interface to view the heatmap of road conditions.
+2. **Alert Management**: Users can view, acknowledge, and mark alerts as resolved.
+3. **Interactive Map**: Features like zooming, panning, and filtering by date or severity enhance usability.
+4. **Feedback Loop**: Stakeholders can provide feedback on detected anomalies to improve system accuracy.
 
 ## Server-Side Application
 
@@ -325,42 +288,3 @@ The **actuator nodes** are integrated within the sensor nodes, handling data tra
   - Transmit only aggregated or significant data points.
 - **Data Compression**:
   - Compress data before transmission to reduce bandwidth usage.
-
-## Possible Enhancements
-
-- **Advanced Analytics**:
-  - Use AI to predict road degradation over time.
-- **Real-Time Alerts**:
-  - Notify drivers of upcoming road hazards.
-- **Community Engagement**:
-  - Allow users to report anomalies manually via a mobile app.
-- **Integration with Municipal Systems**:
-  - Provide data directly to city maintenance departments.
-- **Additional Sensors**:
-  - Incorporate temperature or humidity sensors to correlate environmental factors.
-
-## Scalability and Backend Design
-
-The backend of the **RoadSense system** is designed to be highly scalable, capable of handling data from thousands of devices simultaneously. Key considerations include:
-
-- **Distributed Architecture**:
-  - Use microservices to separate concerns and allow independent scaling of components.
-- **Load Balancing**:
-  - Distribute incoming data across multiple servers to prevent bottlenecks.
-- **Message Queues**:
-  - Implement queues like RabbitMQ or Kafka to handle high-throughput data ingestion.
-- **Cloud Infrastructure**:
-  - Utilize cloud services like AWS, Azure, or Google Cloud for elasticity.
-- **Database Scalability**:
-  - Employ sharding and replication to manage large datasets efficiently.
-- **Monitoring and Logging**:
-  - Implement robust monitoring to detect and address performance issues promptly.
-- **Security**:
-  - Regularly update and patch systems to protect against vulnerabilities.
-- **Scalable Data Pipeline Diagram**:
-  - A diagram illustrates the flow from data ingestion to processing and storage, highlighting scalability features.
-- **User Interaction Diagram**:
-  - Depicts how users interact with the system, from accessing the web interface to managing alerts.
-
-_Note_: The diagrams detailing the IoT data pipeline and user interactions emphasize the system's scalability and user-centric design, ensuring seamless operation even as the number of devices and users grows.
-
