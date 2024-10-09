@@ -167,7 +167,7 @@ The pipeline consists of the following components:
 
 This section describes the client-server architecture of the system, focusing on the interaction between the web application and the server-side components. The following diagram illustrates how the client (web browser) interacts with the server to load and visualize collected data:
 
-![Client-Server Architecture](../assets/diagrams/web_app_architecture/web_app_architecture.svg)
+![Client-Server Architecture](../assets/diagrams/web_app_architecture/web_app_architecture.svg){width=50%}
 
 The pipeline consists of the following components:
 
