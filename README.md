@@ -27,12 +27,12 @@ The **Road Bumpiness Telemetry** project aims to develop an IoT device that can 
 
 ### Hardware
 
-1. **Arduino Board with Wi-Fi Capability**: Use an Arduino Uno with a Wi-Fi module or an Arduino Nano 33 IoT for processing and connectivity.
-2. **Wi-Fi Module**: ESP8266 or ESP32 if using a board without built-in Wi-Fi.
-3. **IMU Sensor**: MPU-6050 or MPU-9250 for accelerometer and gyroscope data.
-4. **GPS Module**: Ublox NEO-6M GPS module for accurate positioning.
-5. **Power Supply**: Rechargeable Li-Po battery with a voltage regulator (e.g., LM7805) for stable power.
-6. **Enclosure**: Protective casing to house all components securely.
+1. **Arduino Board with Wi-Fi Capability**: Arduino Portenta H7 [*datasheet*](./documentations/portenta_datasheet.pdf) [*library*](https://github.com/TheSpaceDragon/rdv-gy521) 
+2. **IMU Sensor**: GY-521 with MPU6050 6DOF (3-Axis Gyro and 3-Axis Accelerometer) 
+   [*datasheet_MPU650*](./documentations/imu_gy521_mpu6050_datasheet.pdf)
+3. **GPS Module**: DFRobot GPS + BDS BeiDou [*wiki*](https://wiki.dfrobot.com/GPS_+_BDS_BeiDou_Dual_Module_SKU_TEL0132)
+4. **Power Supply**: Rechargeable Li-Po battery with a voltage regulator (e.g., LM7805) for stable power. **OUTSTANDING**
+5. **Enclosure**: Protective casing to house all components securely. **OUTSTANDING**
 
 ### Software
 
@@ -57,10 +57,30 @@ The **Road Bumpiness Telemetry** project aims to develop an IoT device that can 
 
 ### 1. Hardware Setup
 
-- **Microcontroller Selection**: Use an Arduino with built-in Wi-Fi or add an ESP8266/ESP32 module.
+- **Microcontroller Selection**: Use an Arduino with built-in Wi-Fi.
 - **Connecting Sensors**: Wire the IMU and GPS modules to the Arduino following manufacturer guidelines.
 - **Power Management**: Use a voltage regulator to ensure consistent power supply from the battery.
 - **Enclosure Design**: Design a compact and durable case using 3D printing or off-the-shelf enclosures.
+  
+#### Pin Connections
+
+| Sensor                           | Pin on Sensor         | Arduino Portenta H7 Pin   | Description                                                                 |
+|----------------------------------|-----------------------|---------------------------|-----------------------------------------------------------------------------|
+| **GY-521 (MPU6050)**             | VCC                   | 3.3V                      | Power supply (3.3V)                                                          |
+|                                  | GND                   | GND                       | Ground                                                                     |
+|                                  | SDA                   | SDA (Pin 2)               | I2C Data line (SDA) for communication with the Arduino                       |
+|                                  | SCL                   | SCL (Pin 3)               | I2C Clock line (SCL) for communication with the Arduino                      |
+|                                  | XDA                   | Not connected             | Extra I2C data line (not used in standard connections)                      |
+|                                  | XCL                   | Not connected             | Extra I2C clock line (not used in standard connections)                     |
+|                                  | AD0                   | GND                       | I2C address selection pin (set to GND for default I2C address)              |
+|                                  | INT                   | Not connected (optional)  | Interrupt pin, can be used to trigger an event in the program (optional)    |
+| **DFRobot GPS + BDS BeiDou**     | VCC                   | 5V                        | Power supply (5V) for GPS module                                             |
+|                                  | GND                   | GND                       | Ground                                                                     |
+|                                  | TX                    | RX (Pin 0)                | Serial data transmit line (TX from GPS to RX on Portenta H7)                |
+|                                  | RX                    | TX (Pin 1)                | Serial data receive line (RX from GPS to TX on Portenta H7)                 |
+|                                  | SDA                   | Not connected             | I2C Data line (not used in this module, GPS communicates via UART)          |
+|                                  | SCL                   | Not connected             | I2C Clock line (not used in this module, GPS communicates via UART)         |
+|                                  | PPS                   | Not connected             | Pulse Per Second (optional, can be used for precise time synchronization)   |
 
 ### 2. Firmware Development
 
