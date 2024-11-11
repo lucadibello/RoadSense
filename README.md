@@ -68,16 +68,16 @@ The **Road Bumpiness Telemetry** project aims to develop an IoT device that can 
 |----------------------------------|-----------------------|---------------------------|-----------------------------------------------------------------------------|
 | **GY-521 (MPU6050)**             | VCC                   | 3.3V                      | Power supply (3.3V)                                                          |
 |                                  | GND                   | GND                       | Ground                                                                     |
-|                                  | SDA                   | SDA (Pin 2)               | I2C Data line (SDA) for communication with the Arduino                       |
-|                                  | SCL                   | SCL (Pin 3)               | I2C Clock line (SCL) for communication with the Arduino                      |
+|                                  | SDA                   | SDA (Pin 11)               | I2C Data line (SDA) for communication with the Arduino                       |
+|                                  | SCL                   | SCL (Pin 12)               | I2C Clock line (SCL) for communication with the Arduino                      |
 |                                  | XDA                   | Not connected             | Extra I2C data line (not used in standard connections)                      |
 |                                  | XCL                   | Not connected             | Extra I2C clock line (not used in standard connections)                     |
 |                                  | AD0                   | GND                       | I2C address selection pin (set to GND for default I2C address)              |
 |                                  | INT                   | Not connected (optional)  | Interrupt pin, can be used to trigger an event in the program (optional)    |
 | **DFRobot GPS + BDS BeiDou**     | VCC                   | 5V                        | Power supply (5V) for GPS module                                             |
 |                                  | GND                   | GND                       | Ground                                                                     |
-|                                  | TX                    | RX (Pin 0)                | Serial data transmit line (TX from GPS to RX on Portenta H7)                |
-|                                  | RX                    | TX (Pin 1)                | Serial data receive line (RX from GPS to TX on Portenta H7)                 |
+|                                  | TX                    | RX (Pin 13)                | Serial data transmit line (TX from GPS to RX on Portenta H7)                |
+|                                  | RX                    | TX (Pin 14)                | Serial data receive line (RX from GPS to TX on Portenta H7)                 |
 |                                  | SDA                   | Not connected             | I2C Data line (not used in this module, GPS communicates via UART)          |
 |                                  | SCL                   | Not connected             | I2C Clock line (not used in this module, GPS communicates via UART)         |
 |                                  | PPS                   | Not connected             | Pulse Per Second (optional, can be used for precise time synchronization)   |
