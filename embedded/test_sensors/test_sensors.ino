@@ -2,19 +2,15 @@
                               // -> Built-in library in Arduino IDE
 #include <MPU6050.h>          // MPU6050 library for reading accelerometer and gyroscope data
                               // -> Install from Arduino Library Manager (Search for "MPU6050 by Jeff Rowberg")
-#include <SoftwareSerial.h>   // SoftwareSerial library for GPS communication on pins other than hardware serial
-                              // -> Built-in library in Arduino IDE
 #include <TinyGPS++.h>        // TinyGPS++ library for parsing GPS data
                               // Install from Arduino Library Manager (Search for "TinyGPSPlus" by Mikal Hart)
 
-// Define Pins for GPS Communication
-#define GPS_RX_PIN 0  // RX Pin for GPS
-#define GPS_TX_PIN 1  // TX Pin for GPS
+// Use Serial1 or Serial2 for GPS communication (Hardware Serial for Portenta H7)
+#define GPS_BAUD 9600
 
 // Create instances for MPU6050 and GPS
 MPU6050 mpu;
-SoftwareSerial ss(GPS_RX_PIN, GPS_TX_PIN); // Create a software serial port for GPS communication
-TinyGPSPlus gps; // Create an instance of the GPS object
+TinyGPSPlus gps; // GPS object
 
 // Define data structure to hold sensor measurements
 struct SensorData {
@@ -46,8 +42,8 @@ void setup() {
   }
   Serial.println("MPU6050 Initialized");
 
-  // Initialize GPS
-  ss.begin(9600);
+  // Initialize GPS communication with Serial1
+  Serial1.begin(GPS_BAUD);
   Serial.println("GPS Initialized");
 
   // Allow time for sensors to initialize
@@ -71,8 +67,8 @@ void loop() {
   sensorData.gz = gzRaw / 131.0;
 
   // Read GPS data
-  while (ss.available() > 0) {
-    gps.encode(ss.read());
+  while (Serial1.available() > 0) {
+    gps.encode(Serial1.read());
   }
 
   // If GPS fix is available, store the position and velocity
