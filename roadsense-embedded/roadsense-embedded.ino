@@ -1,4 +1,7 @@
-// RoadSense entry point here!
+//
+// NOTE: RoadSense entry point here!
+//
+
 void setup() {
   // put your setup code here, to run once:
 }
