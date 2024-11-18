@@ -1,0 +1,43 @@
+http:
+  routers:
+    web:
+      entryPoints:
+        - web
+      rule: "Host(`example.com`)"
+      service: rabbit
+      middlewares:
+        - https-redirect
+
+    websecure:
+      entryPoints:
+        - websecure
+      rule: "Host(`example.com`)"
+      service: rabbit
+      tls:
+        certResolver: mkcert
+        domains:
+          - main: "example.com"
+            sans:
+              - "www.example.com"
+
+  services:
+    rabbit:
+      url: "http://rabbit:5672"
+
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  mkcert:
+    acme:
+      email: "your-email@example.com"
+      storage: "/etc/traefik/acme.json"
+      tlsChallenge: {}
