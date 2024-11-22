@@ -1,6 +1,6 @@
 CLI = docker-compose
 ENV_FILE = .env
-DOCKER_COMPOSE_FILE = traefik.docker-compose.yml
+DOCKER_COMPOSE_FILE = docker-compose.yml
 SERVICE = traefik
 
 COMMAND = $(CLI) --env-file $(ENV_FILE) -f $(DOCKER_COMPOSE_FILE)
