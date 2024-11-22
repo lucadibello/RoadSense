@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  # Traefik Reverse Proxy
+  traefik:
+    image: traefik:v3.2 # Ensure you are using the correct version as per your requirement
+    container_name: traefik
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+      - "8080:8080" # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./config/certs:/etc/traefik/config:ro
+      - ./logs:/traefik/logs
+      - ./certs:/certs # Mount the certificates directory
+    networks:
+      - traefik_network
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: user # Replace with your desired username
+      RABBITMQ_DEFAULT_PASS: password # Replace with your desired password
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.$(DOMAIN)`)"
+      - "traefik.http.routers.rabbitmq.entrypoints=websecure"
+      - "traefik.http.routers.rabbitmq.tls=true"
+      # No certresolver needed since using manual certificates
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+    networks:
+      - traefik_network
+
+networks:
+  traefik_network:
+    external: true
