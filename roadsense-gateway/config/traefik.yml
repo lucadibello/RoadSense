@@ -1,10 +1,13 @@
-accessLog:
-  filePath: "/etc/traefik/logs/access.log"
+log:
+  level: DEBUG
 
-providers:
-  docker:
-    endpoint: "unix:///var/run/docker.sock"
-    exposedByDefault: false
+accessLog:
+  filePath: "/traefik/logs/access.log"
+  format: common
+
+api:
+  dashboard: true
+  insecure: true # For development; secure in production
 
 entryPoints:
   web:
@@ -12,8 +15,18 @@ entryPoints:
     http:
       redirections:
         entryPoint:
-          scheme: "https"
+          to: websecure
+          scheme: https
   websecure:
     address: ":443"
     http:
-      encodeQuerySemicolons: true
+      tls: {}
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik_network
+  file:
+    directory: "/etc/traefik/config"
+    watch: true
