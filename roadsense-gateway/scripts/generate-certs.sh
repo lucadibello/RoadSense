@@ -27,28 +27,21 @@ if [ -z "$CERTIFICATE_DOMAINS" ]; then
 fi
 
 # Create the cert directory and CA directory if they don't exist
-mkdir -p ./certs/CA
+mkdir -p ./certs
 
 echo "Generating certificates for domains [$CERTIFICATE_DOMAINS]..."
+cwd=$(pwd)
+tmpDir=$(mktemp -d -t mkcert-XXXX)
+cd $tmpDir
 
-# Define Docker volume mappings and environment variables
-DOCKER_VOLUME_CERT="-v $(pwd)/certs:/certs"
-DOCKER_VOLUME_CA="-v $(pwd)/certs/CA:/CA"
-DOCKER_ENV_CAROOT="-e CAROOT=/CA"
-DOCKER_WORKDIR="-w /certs"
+# install mkcert + generate certs
+cd $tmpDir
+mkcert -install
+mkcert $CERTIFICATE_DOMAINS
+cd $cwd
 
-# Install the local CA in the Docker container
-docker run -ti --rm \
-  $DOCKER_VOLUME_CERT \
-  $DOCKER_VOLUME_CA \
-  $DOCKER_ENV_CAROOT \
-  $DOCKER_WORKDIR \
-  alpine/mkcert -install
+# Move back all generated files to the certs directory
+mv $tmpDir/*.pem ./certs
 
-# Generate the certificates
-docker run -ti --rm \
-  $DOCKER_VOLUME_CERT \
-  $DOCKER_VOLUME_CA \
-  $DOCKER_ENV_CAROOT \
-  $DOCKER_WORKDIR \
-  alpine/mkcert $CERTIFICATE_DOMAINS
+# Delete the temporary directory
+rm -rf $tmpDir
