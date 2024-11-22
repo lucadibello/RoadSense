@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  # NextJS Website
+  nextjs:
+    image: your-nextjs-image:latest # Replace with your NextJS image
+    container_name: nextjs
+    build:
+      context: ./path-to-nextjs # Replace with your NextJS project path
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextjs.rule=Host(`yourdomain.com`)" # Replace with your domain
+      - "traefik.http.routers.nextjs.entrypoints=websecure"
+      - "traefik.http.routers.nextjs.tls=true"
+      - "traefik.http.routers.nextjs.tls.certresolver=myresolver"
+      - "traefik.http.services.nextjs.loadbalancer.server.port=3000"
+    networks:
+      - traefik_network
