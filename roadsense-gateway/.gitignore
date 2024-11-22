@@ -1,4 +1,2 @@
 certs/
 logs/
-.env
-!.env.example
