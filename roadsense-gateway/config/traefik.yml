@@ -1,43 +1,19 @@
-http:
-  routers:
-    web:
-      entryPoints:
-        - web
-      rule: "Host(`example.com`)"
-      service: rabbit
-      middlewares:
-        - https-redirect
+accessLog:
+  filePath: "/etc/traefik/logs/access.log"
 
-    websecure:
-      entryPoints:
-        - websecure
-      rule: "Host(`example.com`)"
-      service: rabbit
-      tls:
-        certResolver: mkcert
-        domains:
-          - main: "example.com"
-            sans:
-              - "www.example.com"
-
-  services:
-    rabbit:
-      url: "http://rabbit:5672"
-
-  middlewares:
-    https-redirect:
-      redirectScheme:
-        scheme: https
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
 
 entryPoints:
   web:
     address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          scheme: "https"
   websecure:
     address: ":443"
-
-certificatesResolvers:
-  mkcert:
-    acme:
-      email: "your-email@example.com"
-      storage: "/etc/traefik/acme.json"
-      tlsChallenge: {}
+    http:
+      encodeQuerySemicolons: true
