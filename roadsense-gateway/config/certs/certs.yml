@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /certs/roadsense.dev+1.pem
+      keyFile: /certs/roadsense.dev+1-key.pem
