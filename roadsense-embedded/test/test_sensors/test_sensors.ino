@@ -1,7 +1,7 @@
 #include <Wire.h>             // I2C communication library for MPU6050 sensor 
                               // -> Built-in library in Arduino IDE
 #include <MPU6050.h>          // MPU6050 library for reading accelerometer and gyroscope data
-                              // -> Install from Arduino Library Manager (Search for "MPU6050 by Jeff Rowberg")
+                              // -> Install from Arduino Library Manager (Search for "MPU6050 by Electornic Cats")
 #include <TinyGPS++.h>        // TinyGPS++ library for parsing GPS data
                               // Install from Arduino Library Manager (Search for "TinyGPSPlus" by Mikal Hart)
 
@@ -27,11 +27,14 @@ struct SensorData {
 SensorData sensorData;
 
 void setup() {
+  // Define status for debugging purposes
+  int devStatus = 0;
+
   // Start serial communication for debugging
   Serial.begin(115200);
   while (!Serial); // Wait for the Serial Monitor to open
 
-  // Initialize MPU6050 (GY-521)
+  // ============= Initialize MPU6050 (GY-521) =============
   Wire.begin();
   mpu.initialize();
   
@@ -39,8 +42,30 @@ void setup() {
   if (!mpu.testConnection()) {
     Serial.println("MPU6050 connection failed");
     while (1); // Halt the program
+  } else {
+    Serial.println("MPU6050 connection successful");
   }
+
+  /* Supply your gyro offsets here, scaled for min sensitivity */
+  // Offstes form running EC MPU6050 Lib example: MPU650_zero.ino
+  mpu.setXGyroOffset(0);
+  mpu.setYGyroOffset(0);
+  mpu.setZGyroOffset(0);
+  mpu.setXAccelOffset(0);
+  mpu.setYAccelOffset(0);
+  mpu.setZAccelOffset(0);
+
+  /* Making sure it worked (returns 0 if so) */ 
+  if (devStatus == 0) {
+    mpu.CalibrateAccel(6);  // Calibration Time: generate offsets and calibrate our MPU6050
+    mpu.CalibrateGyro(6);
+    Serial.println("These are the Active offsets: ");
+    mpu.PrintActiveOffsets();
+  }
+
   Serial.println("MPU6050 Initialized");
+
+  // ============
 
   // Initialize GPS communication with Serial1
   Serial1.begin(GPS_BAUD);
