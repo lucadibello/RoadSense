@@ -47,7 +47,7 @@ void setup() {
 }
 
 void loop() {
-  int16_t gravityCorrection = -16400;
+  int16_t gravityCorrection = -16384;
   // Read MPU6050 data (accelerations and gyroscope)
   int16_t ax, ay, az;
   mpu.getAcceleration(&ax, &ay, &az);

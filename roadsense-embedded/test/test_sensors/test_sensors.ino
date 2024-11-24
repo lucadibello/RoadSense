@@ -48,12 +48,12 @@ void setup() {
 
   /* Supply your gyro offsets here, scaled for min sensitivity */
   // Offstes form running EC MPU6050 Lib example: MPU650_zero.ino
-  mpu.setXGyroOffset(0);
-  mpu.setYGyroOffset(0);
-  mpu.setZGyroOffset(0);
-  mpu.setXAccelOffset(0);
-  mpu.setYAccelOffset(0);
-  mpu.setZAccelOffset(0);
+  mpu.setXAccelOffset(2290);
+  mpu.setYAccelOffset(-2687);
+  mpu.setZAccelOffset(5392);
+  mpu.setXGyroOffset(35);
+  mpu.setYGyroOffset(-55);
+  mpu.setZGyroOffset(7);
 
   /* Making sure it worked (returns 0 if so) */ 
   if (devStatus == 0) {
