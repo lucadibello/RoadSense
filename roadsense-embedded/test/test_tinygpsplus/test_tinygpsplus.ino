@@ -12,7 +12,11 @@ TinyGPSCustom antennaStatus(gps, "GPTXT", 4);  // Field index 4 contains the ant
 
 // Function prototypes
 bool isGPSConnected();
+bool isGPSAntennaConnected();
 bool isGPSWorkingCorrectly();
+bool hasSatelliteConnection();
+bool hasGoodSignal();
+bool waitForSatellite();
 bool waitForValidLocation();
 void signalSetupProcess(bool status);
 
@@ -32,13 +36,23 @@ void setup() {
   // Signal start of setup (LED ON)
   signalSetupProcess(true);
 
-  // Check if GPS is working correctly and antenna is connected
+  // Check for hardware faults
   if (!isGPSWorkingCorrectly()) {
     Serial.println("GPS is not working correctly or antenna is disconnected.");
-    // You can choose to halt or continue based on your application
-    // For this code, we'll attempt to proceed and wait for valid data
+    // Halt execution until hardware was fixed -> maybe restart periodically with watchdog
   } else {
     Serial.println("GPS is working correctly and antenna is connected.");
+  }
+
+  // Wait until Satellite connection is found
+  while(true) {
+    if (waitForSatellite()) {
+      Serial.println("Valid Satellite connection acquired.");
+      break;
+    } else {
+      Serial.println("Failed Satellite connection.");
+      Serial.println("Trying again...");
+    }
   }
 
   // Wait until a valid location is found
@@ -124,9 +138,9 @@ void loop() {
 // Function to signal setup process using LED
 void signalSetupProcess(bool status) {
   if (status) {
-    digitalWrite(LED_PIN, HIGH);  // LED ON
+    digitalWrite(LED_PIN, LOW);  // LED ON
   } else {
-    digitalWrite(LED_PIN, LOW);   // LED OFF
+    digitalWrite(LED_PIN, HIGH);   // LED OFF
   }
 }
 
@@ -135,38 +149,63 @@ bool isGPSConnected() {
   return gps.location.isValid() && gps.location.age() < 2000;  // Age in milliseconds
 }
 
+// Check for physical Antenna Connection
+bool isGPSAntennaConnected() {
+  const char* status = antennaStatus.value();
+  if (strcmp(status, "ANTENNA OK") == 0) {
+    return true;
+  }
+  return false;
+}
+
+// Check for Satelite connection
+bool hasSatelliteConnection() {
+  return gps.satellites.isValid() && gps.satellites.value() > 0;
+}
+
+// Check for good signal quality (HDOP)
+bool hasGoodSignal() {
+  return gps.hdop.isValid() && gps.hdop.hdop() < 10.0;
+}
 // Function to check if GPS is working correctly and antenna is connected
 bool isGPSWorkingCorrectly() {
   // Check antenna status
   bool antennaConnected = false;
 
-  // Wait for antenna status message
+  // Wait for antenna status message (-> atleast one complete transmission has finished)
   unsigned long start = millis();
   while (millis() - start < 5000) {  // Wait up to 5 seconds
     while (Serial1.available() > 0) {
       char c = Serial1.read();
       gps.encode(c);
     }
-
+    
     if (antennaStatus.isUpdated()) {
-      const char* status = antennaStatus.value();
-      if (strcmp(status, "ANTENNA OK") == 0) {
-        antennaConnected = true;
-        break;
-      } else if (strcmp(status, "ANTENNA OPEN") == 0) {
-        antennaConnected = false;
-        break;
-      }
+      antennaConnected = isGPSAntennaConnected();
+      break;
     }
   }
 
-  // Check for valid satellite data
-  bool hasSatellites = gps.satellites.isValid() && gps.satellites.value() > 0;
+  return antennaConnected;
+}
 
-  // Check HDOP (signal quality)
-  bool hasGoodSignal = gps.hdop.isValid() && gps.hdop.hdop() < 10.0;
+// Function to wait until a Satellite connection was found
+bool waitForSatellite() {
+  Serial.println("Waiting for Satellite connection...");
+  unsigned long start = millis();
+  while (millis() - start < 60000) {  // Wait up to 60 seconds
+    while (Serial1.available() > 0) {
+      char c = Serial1.read();
+      gps.encode(c);
+    }
 
-  return antennaConnected && hasSatellites && hasGoodSignal;
+    if (hasSatelliteConnection() && hasGoodSignal()) {
+      return true;  // Valid Satellite connection
+    }
+
+    delay(500);  // Small delay before checking again
+  }
+  return false;  // Failed to get valid location within timeout
 }
 
 // Function to wait until a valid location is found
