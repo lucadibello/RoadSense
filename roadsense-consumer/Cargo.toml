@@ -1,5 +1,5 @@
 [package]
-name = "roadsense-backend"
+name = "roadsense-consumer"
 version = "0.1.0"
 edition = "2021"
 
