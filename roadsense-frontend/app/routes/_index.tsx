@@ -1,5 +1,7 @@
 import type { MetaFunction } from "@remix-run/node";
-import { Navbar } from "../components/ui/navbar"; // Adjust this path to where your Navbar is located
+
+import Map from "../components/ui/map.client";
+import { ClientOnly } from "remix-utils/client-only";
 
 export const meta: MetaFunction = () => {
   return [
@@ -11,12 +13,11 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   return (
     <div className="h-screen flex flex-col">
-      {/* Navbar */}
-      <Navbar />
-
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center bg-background text-primary">
-        <p>Hello hello!</p>
+      <div className="flex-1 flex items-center justify-center">
+        <ClientOnly fallback={<div>Loading map...</div>}>
+          {() => <Map />}
+        </ClientOnly>
       </div>
     </div>
   );
