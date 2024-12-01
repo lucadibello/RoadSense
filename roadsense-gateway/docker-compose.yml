@@ -3,6 +3,9 @@ services:
   traefik:
     image: traefik:v3.2 # Ensure you are using the correct version as per your requirement
     container_name: traefik
+    env_file:
+      - .env.local
+      - .env
     ports:
       - "80:80" # HTTP
       - "443:443" # HTTPS
@@ -30,6 +33,7 @@ services:
     container_name: rabbitmq
     env_file:
       - .env
+      - .env.local
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
