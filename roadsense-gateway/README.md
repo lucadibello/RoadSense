@@ -47,7 +47,7 @@ Ensure you have the following files in your project directory:
 - `.env`: Private environment variables.
 - `.env.local`: Public environment variables.
 
-### Sample `.env` Variables:
+### Sample `.env` Variables
 
 ```env
 DOMAIN=roadsense.local
@@ -62,20 +62,24 @@ CERTIFICATE_DOMAINS=roadsense.dev,traefik.roadsense.dev,rabbit.roadsense.dev
 
 To enable HTTPS for local development, `mkcert` is used to generate self-signed certificates.
 
-### Steps:
+### Steps
 
 1. Install `mkcert` on your system:
+
    ```bash
    brew install mkcert   # macOS
    sudo apt install mkcert   # Ubuntu
    ```
+
 2. Run the provided script:
+
    ```bash
    ./generate-certificates.sh
    ```
+
 3. Certificates are stored in the `certs` directory and automatically mounted into the Traefik container.
 
-### Example Certificate Mapping in `traefik.yml`:
+### Example Certificate Mapping in `traefik.yml`
 
 ```yaml
 tls:
@@ -161,6 +165,7 @@ The provided `Makefile` simplifies project management:
   ```
 
 - **Stop the project**:
+
   ```bash
   make stop
   ```
@@ -199,14 +204,18 @@ docker logs -f traefik
 ## Testing the Setup
 
 1. Add the following entries to your `/etc/hosts` file for local testing:
+
    ```
    127.0.0.1 traefik.roadsense.local
    127.0.0.1 rabbit.roadsense.local
    ```
+
 2. Start the services:
+
    ```bash
    make start
    ```
+
 3. Access:
    - Traefik Dashboard: `https://traefik.roadsense.local`
    - RabbitMQ UI: `https://rabbit.roadsense.local`
