@@ -1,12 +1,13 @@
 use dotenv::from_path;
-use log::{error, info};
 use std::env;
 
-const KEYS: [&str; 5] = [
+const KEYS: [&str; 7] = [
+    "CONSUMER_NAME",
     "RABBIT_HOST",
     "RABBIT_PORT",
     "RABBIT_USER",
     "RABBIT_PASSWORD",
+    "RABBIT_EXCHANGE",
     "RABBIT_QUEUE",
 ];
 
@@ -15,11 +16,11 @@ pub fn load_env() -> bool {
     let dotfile = root_dir.join(".env");
 
     // Resolve the absolute path to the `.env` file in the parent directory
-    info!("Loading config from {:?}", dotfile);
+    println!("Loading config from {:?}", dotfile);
 
     // Load the .env file from the specified path
     if let Err(e) = from_path(&dotfile) {
-        error!("Failed to load .env file: {}", e);
+        println!("[!] Failed to load .env file: {}", e);
         return false;
     }
 
@@ -29,11 +30,11 @@ pub fn load_env() -> bool {
         match env::var(key) {
             Ok(_v) => {}
             Err(_e) => {
-                error!("Config {} not present.", key);
+                println!("[!] Config {} not present.", key);
                 ok = false;
             }
         }
     }
 
-    return ok;
+    ok
 }

@@ -1,25 +1,30 @@
 // import config.rs
 mod config;
 mod rabbit;
-use log::{error, info};
+
+use crate::config::load_env;
+
+use log::{debug, error, info};
+use std::process::exit;
 
 #[tokio::main]
 async fn main() {
-    // initialize logger
-    env_logger::init();
-
     // load and validate dotenv
-    let status = config::load_env();
+    let status = load_env();
     if !status {
-        error!("Failed to load config file. Check your logs");
-        std::process::exit(1);
+        println!("Failed to load .env file");
+        exit(1);
     }
     info!("Config file loaded successfully.");
+
+    // initialize logger
+    env_logger::init();
+    debug!("Logger initialized");
 
     let res = rabbit::build().await;
     if res.is_err() {
         error!("Failed to initialize RabbitMQ handler. Check your logs");
-        std::process::exit(1);
+        exit(1);
     }
 
     // get rabbit handler

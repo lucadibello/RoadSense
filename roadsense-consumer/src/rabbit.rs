@@ -1,15 +1,28 @@
-use lapin::{Connection, ConnectionProperties};
-use log::{error, info};
+use lapin::options::{BasicAckOptions, BasicConsumeOptions};
+use lapin::{types::FieldTable, Connection, ConnectionProperties};
+
+use futures_lite::stream::StreamExt;
+// import required future traits
+
+use log::{debug, error, info};
 use std::env;
 use std::error::Error;
 
 pub struct Rabbit {
     connection: Connection,
+
+    queue: String,
+    tag: String,
+    // exchange: String,
 }
 
 impl Rabbit {
-    pub fn new(connection: Connection) -> Self {
-        Rabbit { connection }
+    pub fn new(connection: Connection, queue: String, tag: String) -> Self {
+        Rabbit {
+            connection,
+            queue,
+            tag,
+        }
     }
 
     // close connection
@@ -20,15 +33,30 @@ impl Rabbit {
     }
 
     pub async fn consume(&self) -> Result<(), Box<dyn Error>> {
-        // FIXME: Work in progress
-
         // create a channel
+        debug!("Creating RabbitMQ channel...");
         let channel = self.connection.create_channel().await?;
-        // declare a queue
-        let queue = channel
-            .queue_declare("hello", Default::default(), Default::default())
+
+        // Start consuming messages
+        debug!("Defining consumer...");
+        let mut consumer = channel
+            .basic_consume(
+                &self.queue,
+                &self.tag,
+                BasicConsumeOptions::default(),
+                FieldTable::default(),
+            )
             .await?;
-        info!("Declared queue {:?}", queue);
+
+        // Start consuming messages
+        info!("Consuming messages...");
+        while let Some(delivery) = consumer.next().await {
+            println!("Received message");
+            let delivery = delivery.expect("error in consumer");
+            delivery.ack(BasicAckOptions::default()).await?;
+        }
+
+        // Return Ok if everything went well
         Ok(())
     }
 }
@@ -40,6 +68,12 @@ pub async fn build() -> Result<Rabbit, Box<dyn Error>> {
         env::var("RABBIT_PASSWORD").map_err(|e| format!("Missing RABBIT_PASSWORD: {}", e))?;
     let host = env::var("RABBIT_HOST").map_err(|e| format!("Missing RABBIT_HOST: {}", e))?;
     let port = env::var("RABBIT_PORT").map_err(|e| format!("Missing RABBIT_PORT: {}", e))?;
+
+    // Load queue and exchange
+    let queue = env::var("RABBIT_QUEUE").map_err(|e| format!("Missing RABBIT_QUEUE: {}", e))?;
+    // let exchange =
+    //     env::var("RABBIT_EXCHANGE").map_err(|e| format!("Missing RABBIT_EXCHANGE: {}", e))?;
+    let tag = env::var("CONSUMER_NAME").map_err(|e| format!("Missing CONSUMER_NAME: {}", e))?;
 
     // Build RabbitMQ address
     let addr = format!("amqp://{}:{}@{}:{}", user, password, host, port);
@@ -60,5 +94,5 @@ pub async fn build() -> Result<Rabbit, Box<dyn Error>> {
     };
 
     // return struct with connection
-    Ok(Rabbit::new(conn?))
+    Ok(Rabbit::new(conn?, queue, tag))
 }
