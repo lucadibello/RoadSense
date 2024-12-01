@@ -1,7 +1,7 @@
 use dotenv::from_path;
 use std::env;
 
-const KEYS: [&str; 7] = [
+const KEYS: [&str; 8] = [
     "CONSUMER_NAME",
     "RABBIT_HOST",
     "RABBIT_PORT",
@@ -9,6 +9,7 @@ const KEYS: [&str; 7] = [
     "RABBIT_PASSWORD",
     "RABBIT_EXCHANGE",
     "RABBIT_QUEUE",
+    "SUPPORTED_CONTENT_TYPE",
 ];
 
 pub fn load_env() -> bool {

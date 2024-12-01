@@ -1,6 +1,8 @@
 // import config.rs
 mod config;
+mod message;
 mod rabbit;
+mod validation;
 
 use crate::config::load_env;
 

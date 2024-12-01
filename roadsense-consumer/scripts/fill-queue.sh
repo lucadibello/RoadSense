@@ -19,7 +19,7 @@ set +o allexport
 rabbitmq_uri="amqp://$RABBIT_USER:$RABBIT_PASSWORD@$RABBIT_HOST:$RABBIT_PORT"
 
 # Run the perf-test Docker container to fill the queue
-docker run -it --rm --network host pivotalrabbitmq/perf-test:latest --uri "$rabbitmq_uri" -u "$RABBIT_QUEUE"
+docker run -it --rm --network host pivotalrabbitmq/perf-test:latest --uri "$rabbitmq_uri" -u "$RABBIT_QUEUE" -x 5 -y 0 -a --id "roadsense-benchmark"
 
 # Print a message to the console
 echo "Queue filled with messages."

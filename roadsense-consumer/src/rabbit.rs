@@ -2,7 +2,8 @@ use lapin::options::{BasicAckOptions, BasicConsumeOptions};
 use lapin::{types::FieldTable, Connection, ConnectionProperties};
 
 use futures_lite::stream::StreamExt;
-// import required future traits
+
+use crate::message::QueueMessage;
 
 use log::{debug, error, info};
 use std::env;
@@ -53,7 +54,17 @@ impl Rabbit {
         while let Some(delivery) = consumer.next().await {
             println!("Received message");
             let delivery = delivery.expect("error in consumer");
+
+            // Ack the message to remove it from the queue
             delivery.ack(BasicAckOptions::default()).await?;
+
+            // We wrap the delivered message into a QueueMessage struct
+            let _msg = QueueMessage::new(delivery);
+
+            // TODO: Validate and parse the message to get its JSON contents.
+
+            // _msg.parse_message();
+            println!("Parsed message");
         }
 
         // Return Ok if everything went well
