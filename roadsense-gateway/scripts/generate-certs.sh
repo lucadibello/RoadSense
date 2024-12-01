@@ -7,7 +7,7 @@ set -euo pipefail
 # Load environment variables from the .env file
 #
 
-ENV_FILE=.env
+ENV_FILE=.env.pub
 # Check if the .env file exists
 if [ ! -f "$ENV_FILE" ]; then
   echo "Error: $ENV_FILE file not found. Please create one."
