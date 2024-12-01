@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # Traefik Reverse Proxy
   traefik:
@@ -8,13 +6,21 @@ services:
     ports:
       - "80:80" # HTTP
       - "443:443" # HTTPS
-      - "8080:8080" # Traefik Dashboard
+      - "5672:5672" # AMQP TCP EntryPoint
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./config/certs:/etc/traefik/config:ro
       - ./logs:/traefik/logs
       - ./certs:/certs # Mount the certificates directory
+    labels:
+      - "traefik.enable=true"
+      # Main HTTPS router
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.service=api@internal"
+      # - "traefik.http.routers.traefik.middlewares=strip"
     networks:
       - traefik_network
 
@@ -22,16 +28,25 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
+    env_file:
+      - .env
     environment:
-      RABBITMQ_DEFAULT_USER: user # Replace with your desired username
-      RABBITMQ_DEFAULT_PASS: password # Replace with your desired password
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.$(DOMAIN)`)"
-      - "traefik.http.routers.rabbitmq.entrypoints=websecure"
-      - "traefik.http.routers.rabbitmq.tls=true"
-      # No certresolver needed since using manual certificates
-      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+
+      # HTTP Labels for Management Dashboard
+      - "traefik.http.routers.rabbitmq-ui.rule=Host(`rabbit.${DOMAIN}`)"
+      - "traefik.http.routers.rabbitmq-ui.entrypoints=websecure"
+      - "traefik.http.routers.rabbitmq-ui.tls=true"
+      - "traefik.http.services.rabbitmq-ui.loadbalancer.server.port=15672"
+
+      # TCP Labels for AMQP Service
+      - "traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp"
+      - "traefik.tcp.routers.rabbitmq-amqp.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.rabbitmq-amqp.tls=false"
+      - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
     networks:
       - traefik_network
 
