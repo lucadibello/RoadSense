@@ -2,7 +2,7 @@ services:
   # Traefik Reverse Proxy
   traefik:
     image: traefik:v3.2 # Ensure you are using the correct version as per your requirement
-    container_name: traefik
+    container_name: roadsense-traefik
     env_file:
       - .env.local
       - .env
@@ -30,13 +30,13 @@ services:
   # RabbitMQ
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
+    container_name: roadsense-rabbit
     env_file:
       - .env
       - .env.local
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     labels:
       - "traefik.enable=true"
 
@@ -51,6 +51,26 @@ services:
       - "traefik.tcp.routers.rabbitmq-amqp.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.rabbitmq-amqp.tls=false"
       - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
+    networks:
+      - traefik_network
+
+  # Database
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: "roadsense-db"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    labels:
+      - "traefik.enable=true"
+
+      # TCP Labels for Postgres
+      - "traefik.tcp.routers.postgres.entrypoints=postgres"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`db.${DOMAIN}`)"
+      - "traefik.tcp.routers.postgres.tls=false"
+      - "traefik.tcp.services.postgres.loadbalancer.server.port=${POSTGRES_PORT}"
     networks:
       - traefik_network
 
