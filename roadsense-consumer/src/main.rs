@@ -1,5 +1,6 @@
 // import config.rs
 mod config;
+mod db;
 mod message;
 mod rabbit;
 mod validation;
@@ -22,6 +23,9 @@ async fn main() {
     // initialize logger
     env_logger::init();
     debug!("Logger initialized");
+
+    // connect to db
+    let _conn = db::establish_connection();
 
     let res = rabbit::build().await;
     if res.is_err() {
