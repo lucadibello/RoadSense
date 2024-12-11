@@ -19,14 +19,20 @@ set +o allexport
 rabbitmq_uri="amqp://$RABBIT_USER:$RABBIT_PASSWORD@$RABBIT_HOST:$RABBIT_PORT"
 
 # Run the perf-test Docker container to fill the queue
-docker run -it --rm --network host pivotalrabbitmq/perf-test:latest \
+docker run -it --rm --network host \
+  -v "$(pwd)/scripts/body.json:/body.json" \
+  pivotalrabbitmq/perf-test:latest \
   --auto-delete false \
   --uri "$rabbitmq_uri" \
   --queue "$RABBIT_QUEUE" \
-  --producers 1 --consumers 0 -a \
+  --time 10 \
+  --rate 5 \
+  --producers 1 \
+  -a \
+  --consumers 0 \
   --id "roadsense-benchmark" \
   --body-content-type "application/json" \
-  --json-body "{\"lat\": 51.5074, \"lon\": 0.1278, \"timestamp\": \"$(date +%s)\", \"device_id\": \"benchmark\"}"
+  --body "/body.json"
 
 # Print a message to the console
 echo "Queue filled with messages."
