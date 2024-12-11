@@ -3,7 +3,6 @@ mod config;
 mod db;
 mod message;
 mod rabbit;
-mod validation;
 
 use crate::config::load_env;
 

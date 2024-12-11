@@ -1,4 +1,6 @@
-use lapin::options::{BasicAckOptions, BasicConsumeOptions};
+use lapin::options::{
+    BasicAckOptions, BasicConsumeOptions, QueueDeclareOptions, QueueDeleteOptions,
+};
 use lapin::{types::FieldTable, Connection, ConnectionProperties};
 
 use futures_lite::stream::StreamExt;
@@ -40,8 +42,13 @@ impl Rabbit {
         debug!("queue name: {}, tag: {}", &self.queue, &self.tag);
 
         // declare the queue we want to consume from
+        let queue_options = QueueDeclareOptions {
+            auto_delete: false,
+            ..Default::default()
+        };
+
         let result = channel
-            .queue_declare(&self.queue, Default::default(), Default::default())
+            .queue_declare(&self.queue, queue_options, Default::default())
             .await?;
         info!("Declared queue: {:?}", result);
 
@@ -67,9 +74,8 @@ impl Rabbit {
             delivery.ack(BasicAckOptions::default()).await?;
 
             // We wrap the delivered message into a QueueMessage struct
-            let _msg = QueueMessage::new(delivery);
-
             // TODO: Validate and parse the message to get its JSON contents.
+            let msg = QueueMessage::new(delivery);
 
             // _msg.parse_message();
             println!("Parsed message");
