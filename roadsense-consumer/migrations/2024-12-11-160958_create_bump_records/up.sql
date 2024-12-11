@@ -7,7 +7,7 @@ CREATE TABLE bump_records (
     device_id TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     bumpiness_factor SMALLINT NOT NULL CHECK (bumpiness_factor BETWEEN 0 AND 255),
-    location GEOMETRY(POINT, 4326) NOT NULL,
+    location GEOGRAPHY(Point, 4326) NOT NULL,
     PRIMARY KEY (id, created_at)
 );
 
