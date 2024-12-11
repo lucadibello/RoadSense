@@ -5,7 +5,7 @@ use lapin::{types::FieldTable, Connection, ConnectionProperties};
 
 use futures_lite::stream::StreamExt;
 
-use crate::message::QueueMessage;
+use crate::message::{MessageParser, QueueMessage};
 
 use log::{debug, error, info};
 use std::env;
@@ -75,7 +75,14 @@ impl Rabbit {
 
             // We wrap the delivered message into a QueueMessage struct
             // TODO: Validate and parse the message to get its JSON contents.
-            let msg = QueueMessage::new(delivery);
+            let msg = QueueMessage::new(delivery).parse_message();
+
+            // If message parsing fails, log the error
+            if msg.is_err() {
+                error!("Failed to parse message: {:?}", msg.err());
+                continue;
+            }
+            let msg = msg.unwrap();
 
             // _msg.parse_message();
             println!("Parsed message");

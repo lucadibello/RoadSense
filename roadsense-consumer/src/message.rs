@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, error::Error};
 
 use lapin::message::Delivery;
 use serde::Deserialize;
@@ -28,11 +28,11 @@ impl QueueMessage {
 }
 
 pub trait MessageParser {
-    fn parse_message(&self);
+    fn parse_message(&self) -> Result<JsonMessage, Box<dyn Error>>;
 }
 
 impl MessageParser for QueueMessage {
-    fn parse_message(&self) {
+    fn parse_message(&self) -> Result<JsonMessage, Box<dyn Error>> {
         // extract content type from message
         let content_type = self.msg.properties.content_type();
 
@@ -45,12 +45,16 @@ impl MessageParser for QueueMessage {
             None => false,
         };
 
-        // Validate the message and proceed with decoding
-        if status {
-            // parse the message
-            println!("Message is valid");
+        // if content type is not supported, return an error
+        if !status {
+            Err("Unsupported content type".into())
         } else {
-            println!("Message is invalid");
+            // extract body from message and parse it to JsonMessage
+            let body = std::str::from_utf8(&self.msg.data).unwrap();
+            let parsed: JsonMessage = serde_json::from_str(body)?;
+
+            // return parsed message
+            Ok(parsed)
         }
     }
 }
