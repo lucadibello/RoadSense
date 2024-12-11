@@ -4,12 +4,12 @@ services:
     image: traefik:v3.2 # Ensure you are using the correct version as per your requirement
     container_name: roadsense-traefik
     env_file:
-      - .env.local
       - .env
     ports:
       - "80:80" # HTTP
       - "443:443" # HTTPS
       - "5672:5672" # AMQP TCP EntryPoint
+      - "5432:5432" # AMQP TCP EntryPoint
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
@@ -33,7 +33,6 @@ services:
     container_name: roadsense-rabbit
     env_file:
       - .env
-      - .env.local
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
@@ -56,23 +55,30 @@ services:
 
   # Database
   db:
-    image: timescale/timescaledb:latest-pg16
+    image: timescale/timescaledb-ha:pg17
     container_name: "roadsense-db"
     env_file:
       - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     labels:
       - "traefik.enable=true"
 
       # TCP Labels for Postgres
       - "traefik.tcp.routers.postgres.entrypoints=postgres"
-      - "traefik.tcp.routers.postgres.rule=HostSNI(`db.${DOMAIN}`)"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.postgres.tls=false"
       - "traefik.tcp.services.postgres.loadbalancer.server.port=${POSTGRES_PORT}"
     networks:
       - traefik_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistent volume for Postgres
+
+volumes:
+  postgres_data:
+    driver: local
 
 networks:
   traefik_network:

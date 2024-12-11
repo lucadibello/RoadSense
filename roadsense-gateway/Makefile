@@ -1,9 +1,8 @@
 CLI = docker-compose
 ENV_FILE_PRIVATE = .env
-ENV_FILE_PUBLIC = .env.local
 DOCKER_COMPOSE_FILE = docker-compose.yml
 
-COMMAND = $(CLI) --env-file $(ENV_FILE_PUBLIC) --env-file $(ENV_FILE_PRIVATE) -f $(DOCKER_COMPOSE_FILE)
+COMMAND = $(CLI) --env-file $(ENV_FILE_PRIVATE) -f $(DOCKER_COMPOSE_FILE)
 
 start:
 	$(COMMAND) up -d

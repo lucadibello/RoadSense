@@ -14,12 +14,15 @@ entryPoints:
         entryPoint:
           to: websecure
           scheme: https
+
   websecure:
     address: ":443"
     http:
       tls: {}
+
   amqp:
     address: ":5672" # EntryPoint for AMQP TCP Traffic
+
   postgres:
     address: ":5432" # EntryPoint for Postgres TCP Traffic
 
