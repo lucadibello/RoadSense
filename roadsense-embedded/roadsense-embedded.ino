@@ -5,6 +5,7 @@ using namespace rtos;
 // Define timing constants
 #define TIME_T1 0.5
 #define TIME_T2 1.0
+#define BUFFER_SIZE 10
 
 // Event queue for task offloading
 events::EventQueue evq;
@@ -23,18 +24,61 @@ typedef struct {
     int value;  // Example task data
 } message_t;
 
+class CircularBuffer {
+public:
+    CircularBuffer() : head(0), tail(0), full(false) {}
+
+    bool put(const message_t& item) {
+        buffer[head] = item;
+        if (full) {
+            tail = (tail + 1) % BUFFER_SIZE;
+        }
+        head = (head + 1) % BUFFER_SIZE;
+        full = head == tail;
+        return true;
+    }
+
+    bool get(message_t& item) {
+        if (isEmpty()) {
+            return false;
+        }
+        item = buffer[tail];
+        full = false;
+        tail = (tail + 1) % BUFFER_SIZE;
+        return true;
+    }
+
+    bool isEmpty() const {
+        return (!full && (head == tail));
+    }
+
+    bool isFull() const {
+        return full;
+    }
+
+private:
+    message_t buffer[BUFFER_SIZE];
+    size_t head;
+    size_t tail;
+    bool full;
+};
+
 Queue<message_t, 10> task1_queue;
 Queue<message_t, 10> task2_queue;
 
 MemoryPool<message_t, 10> task1_pool;
 MemoryPool<message_t, 10> task2_pool;
 
+CircularBuffer task1_buffer;
+CircularBuffer task2_buffer;
+
 // Task 1: Example processing function
 void task1_function() {
     message_t *message = task1_pool.alloc();
     if (message) {
         message->value = rand() % 100;  // Simulate task data
-        task1_queue.put(message);
+        task1_buffer.put(*message);
+        task1_pool.free(message);
     }
 }
 
@@ -43,7 +87,8 @@ void task2_function() {
     message_t *message = task2_pool.alloc();
     if (message) {
         message->value = rand() % 50;  // Simulate task data
-        task2_queue.put(message);
+        task2_buffer.put(*message);
+        task2_pool.free(message);
     }
 }
 
@@ -60,18 +105,13 @@ void task2_isr() {
 // Print function to handle data from queues
 void print_results() {
     while (true) {
-        osEvent evt1 = task1_queue.get(TIME_T1 * 1000);
-        if (evt1.status == osEventMessage) {
-            message_t *msg = (message_t *)evt1.value.p;
-            printf("Task1 data: %d\n", msg->value);
-            task1_pool.free(msg);
+        message_t msg;
+        if (task1_buffer.get(msg)) {
+            printf("Task1 data: %d\n", msg.value);
         }
 
-        osEvent evt2 = task2_queue.get(TIME_T2 * 1000);
-        if (evt2.status == osEventMessage) {
-            message_t *msg = (message_t *)evt2.value.p;
-            printf("Task2 data: %d\n", msg->value);
-            task2_pool.free(msg);
+        if (task2_buffer.get(msg)) {
+            printf("Task2 data: %d\n", msg.value);
         }
     }
 }
