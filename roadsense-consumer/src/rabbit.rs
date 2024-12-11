@@ -37,9 +37,15 @@ impl Rabbit {
         // create a channel
         debug!("Creating RabbitMQ channel...");
         let channel = self.connection.create_channel().await?;
+        debug!("queue name: {}, tag: {}", &self.queue, &self.tag);
+
+        // declare the queue we want to consume from
+        let result = channel
+            .queue_declare(&self.queue, Default::default(), Default::default())
+            .await?;
+        info!("Declared queue: {:?}", result);
 
         // Start consuming messages
-        debug!("Defining consumer...");
         let mut consumer = channel
             .basic_consume(
                 &self.queue,
@@ -48,6 +54,8 @@ impl Rabbit {
                 FieldTable::default(),
             )
             .await?;
+
+        info!("Declared queue");
 
         // Start consuming messages
         info!("Consuming messages...");
