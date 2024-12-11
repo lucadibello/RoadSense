@@ -7,12 +7,25 @@
 
 
 // Define constants
+// For debugging output, uncomment the following line
 #define DEBUG
+
+// Define dummy sensor modules for testing without actual hardware
+// Comment out to use actual hardware
+#define DUMMY_GPS
+#define DUMMY_MPU
+
 #define GPS_BAUD 9600         // GPS module baud rate
 
 #define MAX_GPS_WAIT 20000    // Maximum time to wait for GPS data in milliseconds
 #define CALIBRATION_TIME 20000 // Calibration time in milliseconds
-#define SEGMENT_LENGTH 0.5    // Length of road segment in meters
+#define SEGMENT_LENGTH 1.    // Length of road segment in meters
+#define DELAY_AFTER_ITERATION 5 // Delay after each iteration in milliseconds (change for different numbers of iterations)
+
+#define DUMMY_GPS_SPEED 30.0f // Dummy speed for testing
+#define DUMMY_GPS_SPEED_STR "30.0" // Dummy speed string for testing
+#define DUMMY_GPS_LAT 46.012015 // Dummy latitude for testing
+#define DUMMY_GPS_LNG 8.961104 // Dummy longitude for testing
 
 #define MAX_INT16_VALUE 32767
 
@@ -36,6 +49,119 @@ struct SegmentQuality {
 };
 
 // ===================================================== //
+// ============== Dummy Sensor classes ================= //
+// ===================================================== //
+
+// --- Dummy MPU6050 class ---
+#ifdef DUMMY_MPU
+class DUMMY_MPU6050 {
+  public:
+    void initialize() {}
+    void setXAccelOffset(int16_t offset) {}
+    void setYAccelOffset(int16_t offset) {}
+    void setZAccelOffset(int16_t offset) {}
+    void setXGyroOffset(int16_t offset) {}
+    void setYGyroOffset(int16_t offset) {}
+    void setZGyroOffset(int16_t offset) {}
+    void CalibrateAccel(int samples) {}
+    void CalibrateGyro(int samples) {}
+    void getAcceleration(int16_t* x, int16_t* y, int16_t* z) {
+        *x = 0;
+        *y = 0;
+        // -- Generate a normal distribution for z acceleration --
+        // Define min and max for the z-value
+        int16_t minZ = -16384; // -2g in raw units
+        int16_t maxZ = 16384;  // 2g in raw units
+        
+        float mean = (minZ + maxZ) / 2.0f;
+        float range = (float)(maxZ - minZ);
+        float std = range / 6.0f; // about 99.7% within minZ..maxZ
+
+        // Box-Muller transform to generate a normal distribution
+        float u1, u2;
+        // Ensure u1 is not zero
+        do {
+            u1 = random(1, 10000) / 10000.0f; // in (0,1)
+        } while (u1 == 0.0f);
+        u2 = random(0, 10000) / 10000.0f;
+
+        // Compute the normal distributed value
+        float mag = sqrt(-2.0f * log(u1));
+        float normal = mean + std * mag * cos(2.0f * M_PI * u2);
+
+        // Clamp to [minZ, maxZ]
+        if (normal < minZ) normal = minZ;
+        if (normal > maxZ) normal = maxZ;
+
+        *z = (int16_t)normal;
+    }
+    void PrintActiveOffsets() {}
+    bool testConnection() { return true; }
+};
+#endif
+
+#ifdef DUMMY_GPS
+
+const float gpsDummySpeed = DUMMY_GPS_SPEED; // [km/h]
+const char* gpsDummySpeedStr = DUMMY_GPS_SPEED_STR; // [km/h]
+
+// --- Dummy location class to mimic TinyGPSLocation ---
+class DUMMY_TinyGPSLocation {
+public:
+    bool isUpdated() { return true; }
+    bool isValid() { return true; }
+    uint32_t age() { return 0; }
+    double lat() { return latVal; }
+    double lng() { return lngVal; }
+
+    double latVal = DUMMY_GPS_LAT;
+    double lngVal = DUMMY_GPS_LNG;
+};
+
+// Dummy TinyGPSPlus class
+class DUMMY_TinyGPSPlus {
+public:
+    DUMMY_TinyGPSPlus() {
+        location.latVal = lat;
+        location.lngVal = lng;
+    }
+
+    void encode(char c) {
+        // No actual encoding, just a dummy
+    }
+
+    // Public location object
+    DUMMY_TinyGPSLocation location;
+
+    void nextLoc() {
+        // Add approximately <SEGMENT_LENGTH>m to the latitude
+        // 1 degree of latitude ≈ 111,139 meters
+        // So <SEGMENT_LENGTH>m ≈ <SEGMENT_LENGTH> / 111139 degrees
+        double deltaLat = SEGMENT_LENGTH / 111139.0;
+        lat += deltaLat;
+        location.latVal = lat;
+        // Longitude stays constant
+    }
+
+private:
+    double lat = 46.012015;
+    double lng = 8.961104;
+};
+
+// Dummy TinyGPSCustom class
+class DUMMY_TinyGPSCustom {
+public:
+    DUMMY_TinyGPSCustom(DUMMY_TinyGPSPlus& gps, const char* type, int index) {}
+    const char* value() { 
+        // Return dummy speed as a string
+        return gpsDummySpeedStr;
+    }
+    bool isUpdated() { return true; }
+};
+
+#endif
+
+// ===================================================== //
 // ================= RoadQualifier class ================ //
 // ===================================================== //
 
@@ -51,10 +177,20 @@ class RoadQualifier {
 
   private:
     // ----- Sensor objects ----- //
+  #ifndef DUMMY_MPU
     MPU6050 mpu;
+  #else
+    DUMMY_MPU6050 mpu;
+  #endif
+  #ifndef DUMMY_GPS
     TinyGPSPlus gps;
     TinyGPSCustom antennaStatus;
     TinyGPSCustom speedKmph;
+  #else
+    DUMMY_TinyGPSPlus gps;
+    DUMMY_TinyGPSCustom antennaStatus;
+    DUMMY_TinyGPSCustom speedKmph;
+  #endif
 
     bool sensorsInitialized = false;
 
@@ -157,10 +293,13 @@ bool RoadQualifier::begin() {
     return false;
   }
 
+
   sensorsInitialized = true;
   Serial.println("RoadQualifier initialized successfully.");
   Serial.print("MinZAcceleration: "); Serial.println(minZAccDifference);
   Serial.print("MaxZAcceleration: "); Serial.println(maxZAccDifference);
+
+  delay(5000);
 
   return true;
 }
@@ -178,12 +317,12 @@ bool RoadQualifier::isReady() {
 // ====================================================== //
 
 bool RoadQualifier::qualifySegment() {
-  #ifdef DEBUG
+#ifdef DEBUG
   if (!sensorsInitialized) {
     Serial.println("Sensors not initialized. Call begin() first.");
     return false;
   }
-  #endif
+#endif
 
   const float segmentTotalDistance = (float)SEGMENT_LENGTH;  
   const float first10PercentDistance = segmentTotalDistance * 0.1f; // 0.05 m
@@ -201,13 +340,13 @@ bool RoadQualifier::qualifySegment() {
   mpu.getAcceleration(&dummyAcc, &dummyAcc, &lastZAcceleration);
   
   unsigned long iterationEnd = millis();
+  unsigned long iter = 0;
 
   while (!segmentComplete) {
     unsigned long iterationStart = iterationEnd; // Start time of iteration
 
     // Try reading GPS data
     readGPSData();
-
     // Update GPS data
     if(updateLocation() && (segmentDistance <= first10PercentDistance) && !haveInitialGPSForSegment) {
       // Lock onto this GPS reading for the segment start
@@ -226,10 +365,9 @@ bool RoadQualifier::qualifySegment() {
       segmentValid = false;
       break;
     }
-
     // Update acceleration difference
     mpu.getAcceleration(&dummyAcc, &dummyAcc, &currentZAcceleration);
-    int16_t diff = abs(currentZAcceleration - lastZAcceleration);
+    int32_t diff = abs((int32_t)currentZAcceleration - (int32_t)lastZAcceleration);
     if (diff > peakSegmentZAccDifference) {
       peakSegmentZAccDifference = diff;
     }
@@ -243,7 +381,8 @@ bool RoadQualifier::qualifySegment() {
       segmentComplete = true;
     }
 
-    delay(10);
+    iter++;
+    delay(DELAY_AFTER_ITERATION); // Delay to ensure the iteration time is consistent
   }
 
   if (!segmentValid) {
@@ -252,17 +391,32 @@ bool RoadQualifier::qualifySegment() {
   }
 
   // Segment complete and valid
-  int16_t usedMin = (minZAccDifference == maxZAccDifference) ? 0 : minZAccDifference;
-  int16_t usedMax = (minZAccDifference == maxZAccDifference) ? (2 * 16384) : maxZAccDifference;
-  currentSegmentQuality = quantifyToByte(peakSegmentZAccDifference, usedMin, usedMax);
+  currentSegmentQuality = quantifyToByte(peakSegmentZAccDifference, minZAccDifference, maxZAccDifference);
 
+#ifdef DUMMY_GPS
+  gps.nextLoc();
+#endif
+
+#ifdef DEBUG
   Serial.println("Segment completed:");
   Serial.print("Initial Segment Position: Lat=");
   Serial.print(segmentLatitude, 6);
   Serial.print(", Lon=");
   Serial.println(segmentLongitude, 6);
+  Serial.print("Segment Length: ");
+  Serial.print(segmentDistance);
+  Serial.println(" m");
+  Serial.print("Current Speed: ");
+  Serial.print(currentSpeedKmph);
+  Serial.println(" km/h");
+  Serial.print("Number of iterations: ");
+  Serial.println(iter);
+  Serial.print("Peak Z-Acceleration Difference: ");
+  Serial.println(peakSegmentZAccDifference);
   Serial.print("Quality Measure: ");
   Serial.println(currentSegmentQuality);
+  Serial.println("--------------------------------------");
+#endif
 
   return true;
 }
@@ -368,16 +522,22 @@ bool RoadQualifier::waitForValidSpeed() {
 
 // Checks if GPS antenna is connected
 bool RoadQualifier::isGPSAntennaConnected() {
+#ifndef DUMMY_GPS
   const char* status = antennaStatus.value();
   return (strcmp(status, "ANTENNA OK") == 0);
+#else
+  return true;
+#endif
 }
 
 // Reads GPS data from serial port
 void RoadQualifier::readGPSData() {
+#ifndef DUMMY_GPS
   while (Serial1.available() > 0) {
     char c = Serial1.read();
     gps.encode(c);
   }
+#endif
 }
 
 // Updates current location after previous call to readGPSData()
@@ -405,20 +565,31 @@ bool RoadQualifier::updateSpeed(){
 uint8_t RoadQualifier::quantifyToByte(int32_t value, int32_t minValue, int32_t maxValue) {
   #ifdef DEBUG
   if (minValue >= maxValue) {
+    // Handle error: minValue must be less than maxValue
     return 0;
   }
   #endif
 
+  // Clamp the value
   if (value <= minValue) {
     return 0;
   } else if (value >= maxValue) {
     return 255;
   }
 
-  uint32_t range = maxValue - minValue;
-  uint32_t numerator = (uint32_t)(value - minValue) * 255 + (range / 2);
-  uint8_t quantified = (uint8_t)(numerator / range);
-  return quantified;
+  uint32_t range = (uint32_t)(maxValue - minValue);
+  
+  // Use 64-bit arithmetic to avoid overflow
+  // (value - minValue) * 255 might overflow 32-bit if the range is large
+  uint64_t numerator = (uint64_t)(value - minValue) * 255ULL + (range / 2ULL);
+  uint64_t result = numerator / range;
+
+  // result should always be <= 255, but clamp just in case
+  if (result > 255ULL) {
+    result = 255ULL;
+  }
+
+  return (uint8_t)result;
 }
 
 // ======================================================= //
