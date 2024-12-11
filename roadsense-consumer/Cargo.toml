@@ -11,3 +11,4 @@ lapin = "2.5.0"
 log = "0.4.22"
 tokio = { version = "1.41.1", features = ["full"] }
 diesel = { version = "2.2.6", features = ["postgres"] }
+postgis_diesel = "2.4.1"

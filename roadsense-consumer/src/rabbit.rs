@@ -74,17 +74,14 @@ impl Rabbit {
 
 pub async fn build() -> Result<Rabbit, Box<dyn Error>> {
     // Load env variables
-    let user = env::var("RABBIT_USER").map_err(|e| format!("Missing RABBIT_USER: {}", e))?;
-    let password =
-        env::var("RABBIT_PASSWORD").map_err(|e| format!("Missing RABBIT_PASSWORD: {}", e))?;
-    let host = env::var("RABBIT_HOST").map_err(|e| format!("Missing RABBIT_HOST: {}", e))?;
-    let port = env::var("RABBIT_PORT").map_err(|e| format!("Missing RABBIT_PORT: {}", e))?;
+    let user = env::var("RABBIT_USER").unwrap();
+    let password = env::var("RABBIT_PASSWORD").unwrap();
+    let host = env::var("RABBIT_HOST").unwrap();
+    let port = env::var("RABBIT_PORT").unwrap();
 
     // Load queue and exchange
-    let queue = env::var("RABBIT_QUEUE").map_err(|e| format!("Missing RABBIT_QUEUE: {}", e))?;
-    // let exchange =
-    //     env::var("RABBIT_EXCHANGE").map_err(|e| format!("Missing RABBIT_EXCHANGE: {}", e))?;
-    let tag = env::var("CONSUMER_NAME").map_err(|e| format!("Missing CONSUMER_NAME: {}", e))?;
+    let queue = env::var("RABBIT_QUEUE").unwrap();
+    let tag = env::var("CONSUMER_NAME").unwrap();
 
     // Build RabbitMQ address
     let addr = format!("amqp://{}:{}@{}:{}", user, password, host, port);

@@ -25,7 +25,9 @@ async fn main() {
     debug!("Logger initialized");
 
     // connect to db
+    info!("Connecting to database...");
     let _conn = db::establish_connection();
+    info!("Connected to database successfully.");
 
     let res = rabbit::build().await;
     if res.is_err() {
