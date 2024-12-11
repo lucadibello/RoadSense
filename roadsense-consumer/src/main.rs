@@ -2,12 +2,16 @@
 mod config;
 mod db;
 mod message;
+mod model;
 mod rabbit;
+mod schema;
 
 use crate::config::load_env;
+use tokio::{sync::mpsc, time::timeout};
 
 use log::{debug, error, info};
-use std::process::exit;
+use message::JsonMessage;
+use std::{process::exit, sync::Arc, time::Duration};
 
 #[tokio::main]
 async fn main() {
@@ -37,12 +41,75 @@ async fn main() {
     // get rabbit handler
     let rabbit = res.unwrap();
 
-    // start consuming messages
-    let res = rabbit.consume().await;
-    if res.is_err() {
-        error!("Failed to consume messages. Check your logs");
+    // Create a channel to communicate with the RabbitMQ thread
+    let (tx, mut rx) = mpsc::channel::<Arc<JsonMessage>>(1000);
+
+    // Create new thread to consume messages from the queue
+    let handle = tokio::spawn(async move {
+        if let Err(e) = rabbit.consume(&tx).await {
+            error!("Failed to consume messages. Error: {}", e);
+        }
+        // Close the rabbit connection
+        if let Err(e) = rabbit.close().await {
+            error!("Failed to close Rabbit connection. Error: {}", e);
+        }
+    });
+
+    // Array to store bunch of messages
+    const BATCH_SIZE: usize = 10;
+    const TIMEOUT_SECS: u64 = 10;
+    let mut batch = Vec::<Arc<JsonMessage>>::with_capacity(BATCH_SIZE);
+
+    loop {
+        // Wait for a message or timeout
+        let result = timeout(Duration::from_secs(TIMEOUT_SECS), rx.recv()).await;
+
+        match result {
+            Ok(Some(msg)) => {
+                // Add the received message to the batch
+                batch.push(msg);
+                info!("Received message. Batch size: {}", batch.len());
+
+                // If the batch is full, process it
+                if batch.len() >= BATCH_SIZE {
+                    info!("Batch is full. Processing...");
+                    // model::bumprecord::process_batch(&batch).await;
+                    batch.clear();
+                }
+            }
+            Ok(None) => {
+                // The sender has closed the channel
+                info!("Channel closed. Exiting.");
+                break;
+            }
+            Err(_) => {
+                // Timeout occurred
+                if !batch.is_empty() {
+                    info!("Timeout reached. Processing partial batch...");
+                    // model::bumprecord::process_batch(&batch).await;
+                    batch.clear();
+                }
+            }
+        }
     }
 
-    // close rabbit connection
-    rabbit.close().await;
+    // // Now, start pulling data from local queue
+    // while let Some(msg) = rx.recv().await {
+    //     info!("Received message from buffer: {:?}", msg);
+    //
+    //     // Add message to the batch
+    //     batch.push(msg);
+    //
+    //     // If the batch is full, process the batch
+    //     if batch.len() >= BATCH_SIZE {
+    //         info!("Batch is full. Processing...");
+    //         // model::bumprecord::process_batch(&batch).await;
+    //         batch.clear();
+    //     }
+    // }
+
+    // Wait for the thread to finish
+    if let Err(e) = handle.await {
+        error!("Failed to join the thread. Error: {}", e);
+    }
 }

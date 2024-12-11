@@ -1,15 +1,15 @@
-use lapin::options::{
-    BasicAckOptions, BasicConsumeOptions, QueueDeclareOptions, QueueDeleteOptions,
-};
+use lapin::options::{BasicAckOptions, BasicConsumeOptions, QueueDeclareOptions};
 use lapin::{types::FieldTable, Connection, ConnectionProperties};
 
 use futures_lite::stream::StreamExt;
 
-use crate::message::{MessageParser, QueueMessage};
+use crate::message::{JsonMessage, MessageParser, QueueMessage};
 
 use log::{debug, error, info};
 use std::env;
 use std::error::Error;
+use std::sync::Arc;
+use tokio::sync::mpsc::Sender;
 
 pub struct Rabbit {
     connection: Connection,
@@ -29,13 +29,14 @@ impl Rabbit {
     }
 
     // close connection
-    pub async fn close(&self) {
-        if let Err(e) = self.connection.close(0, "Bye").await {
-            error!("Failed to close RabbitMQ connection: {}", e);
-        }
+    pub async fn close(&self) -> Result<(), Box<(dyn Error)>> {
+        // try closing the connection
+        self.connection.close(200, "Bye").await?;
+        // return Ok if everything went well
+        Ok(())
     }
 
-    pub async fn consume(&self) -> Result<(), Box<dyn Error>> {
+    pub async fn consume(&self, sender: &Sender<Arc<JsonMessage>>) -> Result<(), Box<dyn Error>> {
         // create a channel
         debug!("Creating RabbitMQ channel...");
         let channel = self.connection.create_channel().await?;
@@ -67,28 +68,25 @@ impl Rabbit {
         // Start consuming messages
         info!("Consuming messages...");
         while let Some(delivery) = consumer.next().await {
-            println!("Received message");
             let delivery = delivery.expect("error in consumer");
 
             // Ack the message to remove it from the queue
             delivery.ack(BasicAckOptions::default()).await?;
 
             // We wrap the delivered message into a QueueMessage struct
-            // TODO: Validate and parse the message to get its JSON contents.
             let msg = QueueMessage::new(delivery).parse_message();
-
-            // If message parsing fails, log the error
-            if msg.is_err() {
-                error!("Failed to parse message: {:?}", msg.err());
+            if let Err(err) = msg {
+                error!("Failed to parse message: {:?}", err);
                 continue;
             }
-            let msg = msg.unwrap();
+            let msg = Arc::new(msg.unwrap());
 
-            // _msg.parse_message();
-            println!("Parsed message");
+            // Pass the message to the sender
+            if sender.send(msg).await.is_err() {
+                error!("Failed to send message to sender");
+            }
         }
 
-        // Return Ok if everything went well
         Ok(())
     }
 }

@@ -3,15 +3,17 @@ use std::{env, error::Error};
 use lapin::message::Delivery;
 use serde::Deserialize;
 
-#[derive(Debug)]
 pub struct QueueMessage {
     msg: Delivery,
     expected_content_type: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct JsonMessage {
-    pub message: String,
+    pub lat: f64,
+    pub lon: f64,
+    pub timestamp: f64,
+    pub device_id: String,
 }
 
 impl QueueMessage {
@@ -52,8 +54,6 @@ impl MessageParser for QueueMessage {
             // extract body from message and parse it to JsonMessage
             let body = std::str::from_utf8(&self.msg.data).unwrap();
             let parsed: JsonMessage = serde_json::from_str(body)?;
-
-            // return parsed message
             Ok(parsed)
         }
     }
