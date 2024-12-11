@@ -68,7 +68,11 @@ async fn main() {
             Ok(Some(msg)) => {
                 // Add the received message to the batch
                 batch.push(msg);
-                info!("Received message. Batch size: {}", batch.len());
+                info!(
+                    "Received message. Batch size: {}/{}",
+                    batch.len(),
+                    BATCH_SIZE
+                );
 
                 // If the batch is full, process it
                 if batch.len() >= BATCH_SIZE {
@@ -92,21 +96,6 @@ async fn main() {
             }
         }
     }
-
-    // // Now, start pulling data from local queue
-    // while let Some(msg) = rx.recv().await {
-    //     info!("Received message from buffer: {:?}", msg);
-    //
-    //     // Add message to the batch
-    //     batch.push(msg);
-    //
-    //     // If the batch is full, process the batch
-    //     if batch.len() >= BATCH_SIZE {
-    //         info!("Batch is full. Processing...");
-    //         // model::bumprecord::process_batch(&batch).await;
-    //         batch.clear();
-    //     }
-    // }
 
     // Wait for the thread to finish
     if let Err(e) = handle.await {
