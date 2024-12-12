@@ -121,6 +121,15 @@ traefik.tcp.routers.rabbitmq-amqp.tls=false
 traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672
 ```
 
+#### Timescale DB (TCP Traffic)
+
+```yaml
+- "traefik.tcp.routers.postgres.entrypoints=postgres"
+- "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+- "traefik.tcp.routers.postgres.tls=false"
+- "traefik.tcp.services.postgres.loadbalancer.server.port=${POSTGRES_PORT}"
+```
+
 ### HTTP to HTTPS Redirection
 
 Configured in `traefik.yml`:
@@ -140,6 +149,16 @@ entryPoints:
       tls: {}
 ```
 
+### TCP Entrypoints (RabbitMQ and TimescaleDB)
+
+```yaml
+amqp:
+  address: ":5672" # RabbitMQ
+
+postgres:
+  address: ":5432" # TimescaleDB
+```
+
 ---
 
 ## Makefile Commands
@@ -151,6 +170,8 @@ The provided `Makefile` simplifies project management:
   ```bash
   make start
   ```
+
+````
 
 - **View logs**:
 
@@ -208,6 +229,7 @@ docker logs -f traefik
    ```
    127.0.0.1 traefik.roadsense.local
    127.0.0.1 rabbit.roadsense.local
+   127.0.0.1 db.roadsense.local
    ```
 
 2. Start the services:
@@ -223,3 +245,4 @@ docker logs -f traefik
 ---
 
 This setup ensures that RoadSense services are securely and efficiently routed using Traefik and local TLS certificates.
+````
