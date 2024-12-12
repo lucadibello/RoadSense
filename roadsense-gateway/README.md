@@ -171,8 +171,6 @@ The provided `Makefile` simplifies project management:
   make start
   ```
 
-````
-
 - **View logs**:
 
   ```bash
@@ -245,4 +243,7 @@ docker logs -f traefik
 ---
 
 This setup ensures that RoadSense services are securely and efficiently routed using Traefik and local TLS certificates.
-````
+
+```
+
+```
