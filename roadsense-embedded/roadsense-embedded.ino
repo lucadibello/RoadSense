@@ -1,4 +1,5 @@
 #include <mbed.h>
+#include <mutex>
 using namespace mbed;
 using namespace rtos;
 
@@ -19,6 +20,9 @@ Thread t3;
 mbed::Ticker task1;
 mbed::Ticker task2;
 
+// Mutex for synchronization
+Mutex buffer_mutex;
+
 // Queue and memory pool for inter-task communication
 typedef struct {
     int value;  // Example task data
@@ -29,6 +33,7 @@ public:
     CircularBuffer() : head(0), tail(0), full(false) {}
 
     bool put(const message_t& item) {
+        std::lock_guard<Mutex> lock(buffer_mutex);
         buffer[head] = item;
         if (full) {
             tail = (tail + 1) % BUFFER_SIZE;
@@ -39,6 +44,7 @@ public:
     }
 
     bool get(message_t& item) {
+        std::lock_guard<Mutex> lock(buffer_mutex);
         if (isEmpty()) {
             return false;
         }
@@ -63,6 +69,7 @@ private:
     bool full;
 };
 
+// Task queues and memory pools
 Queue<message_t, 10> task1_queue;
 Queue<message_t, 10> task2_queue;
 
@@ -113,6 +120,7 @@ void print_results() {
         if (task2_buffer.get(msg)) {
             printf("Task2 data: %d\n", msg.value);
         }
+        ThisThread::sleep_for(500ms); // Prevent busy loop
     }
 }
 
@@ -128,6 +136,6 @@ void setup() {
 }
 
 void loop() {
-    // Empty loop; tasks are handled via threads and tickersx
+    // Empty loop; tasks are handled via threads and tickers
     // TODO: implement watchdog timer
 }
