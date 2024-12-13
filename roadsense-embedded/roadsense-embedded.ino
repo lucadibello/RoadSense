@@ -1,8 +1,17 @@
-#include <mbed.h>
-#include <mutex>
-#include "roadqualifier.h"
+#include <Arduino.h>       // Arduino classes, including Print and Stream
+#include <WiFi.h>          // Arduino WiFi
 #include "SegmentQuality.h"
-using namespace mbed;
+#include "RabbitMQClient.h" // includes PubSubClient.h which uses Arduino::Stream
+#include "roadqualifier.h"  // roadqualifier code
+
+#include <mbed.h>
+#include <rtos.h>
+#include <mutex>
+#include <events/mbed_events.h>
+
+// Avoid any macro collisions
+#undef Stream
+
 using namespace rtos;
 
 #define TIME_T2 1.0
@@ -10,19 +19,13 @@ using namespace rtos;
 #define WATCHDOG_TIMEOUT 3.0  // Watchdog timeout in seconds
 #define SERIAL_BAUD 115200    // Serial baud rate
 
-
 // Event queue for task offloading
 events::EventQueue evq;
 
-// Threads to handle tasks
-Thread t1;
-Thread t2;
-
-// Tickers for periodic task activation
+rtos::Thread t1;
+rtos::Thread t2;
 mbed::Ticker task2;
-
-// mutex for buffer access
-Mutex buffer_mutex;
+rtos::Mutex buffer_mutex;
 
 class MyCircularBuffer {
 public:
@@ -106,10 +109,16 @@ void task1_function() {
 // Task 2: send data over RabbitMQ
 void task2_function() {
     SegmentQuality segmentQuality;
+    RabbitMQClient rabbitMQClient;
+
+    // Connect to WiFi
+    rabbitMQClient.connectWiFi();
 
     while (true) {
         if (circular_buffer.get(segmentQuality)) {
-            // TODO: Send data over RabbitMQ
+
+            rabbitMQClient.sendDataCallback(segmentQuality);
+            
             Serial.print("Sent segment quality: ");
             Serial.print(segmentQuality.latitude);
             Serial.print(", ");
