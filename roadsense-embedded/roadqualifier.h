@@ -4,6 +4,8 @@
 #include <TinyGPS++.h>        // TinyGPS++ library by Mikal Hart
 #include <FlashIAPBlockDevice.h>
 #include "FlashIAPLimits.h"
+#include "SegmentQuality.h"
+
 
 
 // Define constants
@@ -39,13 +41,6 @@ struct CalibrationData {
   uint32_t signature;
   int32_t minZAccDifference;
   int32_t maxZAccDifference;
-};
-
-// Struct to store segment quality data
-struct SegmentQuality {
-  double latitude;
-  double longitude;
-  uint8_t quality;
 };
 
 // ===================================================== //

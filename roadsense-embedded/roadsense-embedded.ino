@@ -1,6 +1,7 @@
 #include <mbed.h>
 #include <mutex>
 #include "roadqualifier.h"
+#include "SegmentQuality.h"
 using namespace mbed;
 using namespace rtos;
 
