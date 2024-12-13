@@ -1,13 +1,14 @@
 #include <mbed.h>
 #include <mutex>
+#include "roadqualifier.h"
 using namespace mbed;
 using namespace rtos;
 
-// Define timing constants
-#define TIME_T1 0.5
 #define TIME_T2 1.0
 #define BUFFER_SIZE 10
 #define WATCHDOG_TIMEOUT 3.0  // Watchdog timeout in seconds
+#define SERIAL_BAUD 115200    // Serial baud rate
+
 
 // Event queue for task offloading
 events::EventQueue evq;
@@ -15,24 +16,19 @@ events::EventQueue evq;
 // Threads to handle tasks
 Thread t1;
 Thread t2;
-Thread t3;
 
 // Tickers for periodic task activation
-mbed::Ticker task1;
 mbed::Ticker task2;
 
+// mutex for buffer access
 Mutex buffer_mutex;
 
-typedef struct {
-    int value;  // Example task data
-} message_t;
-
-class CircularBuffer {
+class MyCircularBuffer {
 public:
-    CircularBuffer() : head(0), tail(0), full(false) {}
+    MyCircularBuffer() : head(0), tail(0), full(false) {}
 
-    bool put(const message_t& item) {
-        std::lock_guard<Mutex> lock(buffer_mutex);
+    bool put(const SegmentQuality& item) {
+        std::lock_guard<Mutex> lock(buffer_mutex); // mutex gets released automatically when lock goes out of scope
         buffer[head] = item;
         if (full) {
             tail = (tail + 1) % BUFFER_SIZE;
@@ -42,7 +38,7 @@ public:
         return true;
     }
 
-    bool get(message_t& item) {
+    bool get(SegmentQuality& item) {
         std::lock_guard<Mutex> lock(buffer_mutex);
         if (isEmpty()) {
             return false;
@@ -62,86 +58,79 @@ public:
     }
 
 private:
-    message_t buffer[BUFFER_SIZE];
+    SegmentQuality buffer[BUFFER_SIZE];
     size_t head;
     size_t tail;
     bool full;
 };
 
-Queue<message_t, 10> task1_queue;
-Queue<message_t, 10> task2_queue;
 
-MemoryPool<message_t, 10> task1_pool;
-MemoryPool<message_t, 10> task2_pool;
-
-CircularBuffer task1_buffer;
-CircularBuffer task2_buffer;
+MyCircularBuffer circular_buffer;
 
 Watchdog &watchdog = Watchdog::get_instance();
 
-// Task 1: Example processing function
+// Task 1: run the road qualifier
 void task1_function() {
-    message_t *message = task1_pool.alloc();
-    if (message) {
-        message->value = rand() % 100; // simulate task 
-        task1_buffer.put(*message);
-        task1_pool.free(message);
+    RoadQualifier roadQualifier;
+    SegmentQuality segmentQuality;
+
+    // Initialize the road qualifier
+    if (!roadQualifier.begin()) {
+        Serial.print("Failed to initialize RoadQualifier.\n");
+        return;
     }
 
-    watchdog.kick(); // refresh the watchdog timer
-}
-
-// Task 2: Example processing function
-void task2_function() {
-    message_t *message = task2_pool.alloc();
-    if (message) {
-        message->value = rand() % 50;  // simulate task
-        task2_buffer.put(*message);
-        task2_pool.free(message);
-    }
-
-    watchdog.kick(); // refresh the watchdog timer
-}
-
-// ISR for Ticker 1
-void task1_isr() {
-    evq.call(task1_function);
-}
-
-// ISR for Ticker 2
-void task2_isr() {
-    evq.call(task2_function);
-}
-
-void print_results() {
     while (true) {
-        message_t msg;
-        if (task1_buffer.get(msg)) {
-            printf("Task1 data: %d\n", msg.value);
+        // Qualify a road segment
+        if (roadQualifier.qualifySegment()) {
+            segmentQuality = roadQualifier.getSegmentQuality();
+
+            // Add data to the buffer (overwriting oldest data if full)
+            circular_buffer.put(segmentQuality);
+
+            Serial.print("Added to buffer segment quality: ");
+            Serial.print(segmentQuality.latitude);
+            Serial.print(", ");
+            Serial.print(segmentQuality.longitude);
+            Serial.print(", ");
+            Serial.println(segmentQuality.quality);
+        } else {
+            Serial.println("Failed to qualify segment.");
         }
 
-        if (task2_buffer.get(msg)) {
-            printf("Task2 data: %d\n", msg.value);
+        ThisThread::sleep_for(1000); // 100 ms
+    }
+}
+
+// Task 2: send data over RabbitMQ
+void task2_function() {
+    SegmentQuality segmentQuality;
+
+    while (true) {
+        if (circular_buffer.get(segmentQuality)) {
+            // TODO: Send data over RabbitMQ
+            Serial.print("Sent segment quality: ");
+            Serial.print(segmentQuality.latitude);
+            Serial.print(", ");
+            Serial.print(segmentQuality.longitude);
+            Serial.print(", ");
+            Serial.println(segmentQuality.quality);
+        } else {
+            Serial.println("Buffer is empty. Waiting for data.");
         }
 
-        watchdog.kick(); // refresh the watchdog timer
-        ThisThread::sleep_for(500ms); // no busy loop
+        ThisThread::sleep_for(1000); // 100 ms
     }
 }
 
 void setup() {
-    watchdog.start(WATCHDOG_TIMEOUT * 1000);  // timeout
+    Serial.begin(SERIAL_BAUD);
+    while (!Serial);
 
-    // Start the periodic tasks
-    task1.attach(&task1_isr, TIME_T1); 
-    task2.attach(&task2_isr, TIME_T2); 
-
-    // Start threads
-    t1.start(callback(&evq, &events::EventQueue::dispatch_forever));
-    t2.start(callback(&evq, &events::EventQueue::dispatch_forever));
-    t3.start(print_results);  // Start thread to process and print data
+    t1.start(task1_function);
+    t2.start(task2_function);    
 }
 
 void loop() {
-
+    // Empty loop, tasks handled by threads
 }
