@@ -9,22 +9,16 @@
 #include <mutex>
 #include <events/mbed_events.h>
 
-// Avoid any macro collisions
-#undef Stream
 
 using namespace rtos;
 
-#define TIME_T2 1.0
+#define TIME_T1 1.0
 #define BUFFER_SIZE 10
 #define WATCHDOG_TIMEOUT 3.0  // Watchdog timeout in seconds
 #define SERIAL_BAUD 115200    // Serial baud rate
 
-// Event queue for task offloading
-events::EventQueue evq;
-
-rtos::Thread t1;
 rtos::Thread t2;
-mbed::Ticker task2;
+mbed::Ticker task1;
 rtos::Mutex buffer_mutex;
 
 class MyCircularBuffer {
@@ -84,26 +78,25 @@ void task1_function() {
         return;
     }
 
-    while (true) {
-        // Qualify a road segment
-        if (roadQualifier.qualifySegment()) {
-            segmentQuality = roadQualifier.getSegmentQuality();
+    // Qualify a road segment
+    if (roadQualifier.qualifySegment()) {
+        segmentQuality = roadQualifier.getSegmentQuality();
 
-            // Add data to the buffer (overwriting oldest data if full)
-            circular_buffer.put(segmentQuality);
+        // Add data to the buffer (overwriting oldest data if full)
+        circular_buffer.put(segmentQuality);
 
-            Serial.print("Added to buffer segment quality: ");
-            Serial.print(segmentQuality.latitude);
-            Serial.print(", ");
-            Serial.print(segmentQuality.longitude);
-            Serial.print(", ");
-            Serial.println(segmentQuality.quality);
-        } else {
-            Serial.println("Failed to qualify segment.");
-        }
-
-        ThisThread::sleep_for(1000); // 100 ms
+        Serial.print("Added to buffer segment quality: ");
+        Serial.print(segmentQuality.latitude);
+        Serial.print(", ");
+        Serial.print(segmentQuality.longitude);
+        Serial.print(", ");
+        Serial.println(segmentQuality.quality);
+    } else {
+        Serial.println("Failed to qualify segment.");
     }
+
+    ThisThread::sleep_for(1000); // 100 ms
+
 }
 
 // Task 2: send data over RabbitMQ
@@ -137,7 +130,12 @@ void setup() {
     Serial.begin(SERIAL_BAUD);
     while (!Serial);
 
-    t1.start(task1_function);
+    Serial.println("asdf");
+
+    // start the ticker for task 1
+    task1.attach(task1_function, TIME_T1);
+
+    // start the thread for task 2
     t2.start(task2_function);    
 }
 
