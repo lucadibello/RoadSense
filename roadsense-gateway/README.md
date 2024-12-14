@@ -74,7 +74,7 @@ To enable HTTPS for local development, `mkcert` is used to generate self-signed 
 2. Run the provided script:
 
    ```bash
-   ./generate-certificates.sh
+   make certs
    ```
 
 3. Certificates are stored in the `certs` directory and automatically mounted into the Traefik container.

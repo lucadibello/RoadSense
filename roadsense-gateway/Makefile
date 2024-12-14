@@ -3,6 +3,7 @@ ENV_FILE_PRIVATE = .env
 DOCKER_COMPOSE_FILE = docker-compose.yml
 
 COMMAND = $(CLI) --env-file $(ENV_FILE_PRIVATE) -f $(DOCKER_COMPOSE_FILE)
+CERTS_SCRIPT = ./scripts/generate-certs.sh
 
 start:
 	$(COMMAND) up -d
@@ -16,5 +17,8 @@ attach:
 stop:
 	$(COMMAND) down
 
-.PHONY: start logs attach stop
+certs:
+	$(CERTS_SCRIPT)
+
+.PHONY: start logs attach stop certs
 
