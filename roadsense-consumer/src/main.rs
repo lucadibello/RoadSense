@@ -4,7 +4,6 @@ mod db;
 mod message;
 mod model;
 mod rabbit;
-mod schema;
 
 use crate::config::load_env;
 use model::bumprecord;

@@ -1,0 +1,11 @@
+[package]
+name = "roadsense-diesel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+diesel = { version = "2.2.6", features = ["postgres", "chrono"] }
+postgis_diesel = "2.4.1"
+serde = "1.0.216"
+serde_json = "1.0.133"
+chrono = "0.4.39"

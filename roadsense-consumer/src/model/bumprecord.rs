@@ -1,13 +1,14 @@
 use chrono::{DateTime, NaiveDateTime};
 use diesel::{prelude::*, result::Error};
 use postgis_diesel::types::Point;
+use roadsense_diesel::schema::bump_records;
 use std::sync::Arc;
 
 use crate::message::JsonMessage;
 
 // Define the insertable struct for Diesel
 #[derive(Debug, Insertable)]
-#[diesel(table_name = crate::schema::bump_records)]
+#[diesel(table_name = bump_records)]
 pub struct BumpRecordInsert {
     pub device_id: String,
     pub created_at: NaiveDateTime,
@@ -38,7 +39,7 @@ pub fn process_batch(
         .collect();
 
     // Perform the batch insert
-    diesel::insert_into(crate::schema::bump_records::table)
+    diesel::insert_into(bump_records::table)
         .values(&new_records)
         .execute(conn)
 }
