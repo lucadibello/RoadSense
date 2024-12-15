@@ -1,14 +1,8 @@
 // @generated automatically by Diesel CLI.
 
-pub mod sql_types {
-    #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "geography"))]
-    pub struct Geography;
-}
-
 diesel::table! {
     use diesel::sql_types::*;
-    use super::sql_types::Geography;
+    use postgis_diesel::sql_types::*;
 
     bump_records (id, created_at) {
         id -> Int4,

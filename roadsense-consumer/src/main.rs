@@ -56,27 +56,35 @@ async fn main() {
         }
     });
 
+    // Load batch size and timeout from environment variables
+    let batch_size = std::env::var("QUEUE_SIZE")
+        .expect("BATCH_SIZE must be set")
+        .parse::<usize>()
+        .unwrap_or(50);
+    let timeout_secs = std::env::var("QUEUE_TIMEOUT_SECS")
+        .expect("TIMEOUT_SECS must be set")
+        .parse::<u64>()
+        .unwrap_or(10);
+
     // Array to store bunch of messages
-    const BATCH_SIZE: usize = 10;
-    const TIMEOUT_SECS: u64 = 10;
-    let mut batch = Vec::<Arc<JsonMessage>>::with_capacity(BATCH_SIZE);
+    let mut batch = Vec::<Arc<JsonMessage>>::with_capacity(batch_size);
 
     loop {
         // Wait for a message or timeout
-        let result = timeout(Duration::from_secs(TIMEOUT_SECS), rx.recv()).await;
+        let result = timeout(Duration::from_secs(timeout_secs), rx.recv()).await;
 
         match result {
             Ok(Some(msg)) => {
                 // Add the received message to the batch
                 batch.push(msg);
-                info!(
+                debug!(
                     "Received message. Batch size: {}/{}",
                     batch.len(),
-                    BATCH_SIZE
+                    batch_size
                 );
 
                 // If the batch is full, process it
-                if batch.len() >= BATCH_SIZE {
+                if batch.len() >= batch_size {
                     info!("Batch is full. Processing...");
                     let result = bumprecord::process_batch(&mut conn, &batch);
                     match result {

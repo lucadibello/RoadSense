@@ -1,33 +1,18 @@
+use chrono::{DateTime, NaiveDateTime};
+use diesel::{prelude::*, result::Error};
+use postgis_diesel::types::Point;
 use std::sync::Arc;
 
-use crate::{message::JsonMessage, schema::bump_records};
-use chrono::DateTime;
-use diesel::{
-    prelude::Insertable, result::Error, PgConnection, Queryable, RunQueryDsl, Selectable,
-};
+use crate::message::JsonMessage;
 
-use super::geography::Geography;
-
-// Define geometry type for PostGIS
-#[derive(Queryable, Selectable)]
-#[diesel(table_name = bump_records)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
-struct BumpRecord {
-    id: i32,
-    device_id: String,
-    created_at: chrono::NaiveDateTime,
-    bumpiness_factor: i16,
-    location: Geography,
-}
-
-// Define an insertable version of BumpRecord
-#[derive(Insertable)]
-#[diesel(table_name = bump_records)]
-struct NewBumpRecord<'a> {
-    device_id: &'a str,
-    created_at: chrono::NaiveDateTime,
-    bumpiness_factor: i16,
-    location: Geography,
+// Define the insertable struct for Diesel
+#[derive(Debug, Insertable)]
+#[diesel(table_name = crate::schema::bump_records)]
+pub struct BumpRecordInsert {
+    pub device_id: String,
+    pub created_at: NaiveDateTime,
+    pub bumpiness_factor: i16,
+    pub location: Point,
 }
 
 // Function to process and insert a batch of records
@@ -36,23 +21,24 @@ pub fn process_batch(
     records: &[Arc<JsonMessage>],
 ) -> Result<usize, Error> {
     // Map the JsonMessage vector into NewBumpRecord vector
-    let new_records: Vec<NewBumpRecord> = records
+    let new_records: Vec<BumpRecordInsert> = records
         .iter()
-        .map(|record| NewBumpRecord {
-            device_id: &record.device_id,
+        .map(|record| BumpRecordInsert {
+            device_id: record.device_id.clone(),
             created_at: DateTime::from_timestamp(record.timestamp, 0)
                 .unwrap()
                 .naive_utc(),
             bumpiness_factor: record.bumpiness,
-            location: Geography {
-                lon: record.lon,
-                lat: record.lat,
+            location: Point {
+                x: record.lon,
+                y: record.lat,
+                srid: Some(4326),
             },
         })
         .collect();
 
     // Perform the batch insert
-    diesel::insert_into(bump_records::table)
+    diesel::insert_into(crate::schema::bump_records::table)
         .values(&new_records)
         .execute(conn)
 }
