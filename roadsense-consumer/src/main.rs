@@ -7,6 +7,7 @@ mod rabbit;
 mod schema;
 
 use crate::config::load_env;
+use model::bumprecord;
 use tokio::{sync::mpsc, time::timeout};
 
 use log::{debug, error, info};
@@ -29,7 +30,7 @@ async fn main() {
 
     // connect to db
     info!("Connecting to database...");
-    let _conn = db::establish_connection();
+    let mut conn = db::establish_connection();
     info!("Connected to database successfully.");
 
     let res = rabbit::build().await;
@@ -77,7 +78,15 @@ async fn main() {
                 // If the batch is full, process it
                 if batch.len() >= BATCH_SIZE {
                     info!("Batch is full. Processing...");
-                    // model::bumprecord::process_batch(&batch).await;
+                    let result = bumprecord::process_batch(&mut conn, &batch);
+                    match result {
+                        Ok(s) => {
+                            info!("Batch processed successfully: {} records inserted", s);
+                        }
+                        Err(e) => {
+                            error!("Failed to process batch. Error: {}", e);
+                        }
+                    }
                     batch.clear();
                 }
             }
@@ -90,7 +99,15 @@ async fn main() {
                 // Timeout occurred
                 if !batch.is_empty() {
                     info!("Timeout reached. Processing partial batch...");
-                    // model::bumprecord::process_batch(&batch).await;
+                    let result = bumprecord::process_batch(&mut conn, &batch);
+                    match result {
+                        Ok(s) => {
+                            info!("Batch processed successfully: {} records inserted", s);
+                        }
+                        Err(e) => {
+                            error!("Failed to process batch. Error: {}", e);
+                        }
+                    }
                     batch.clear();
                 }
             }

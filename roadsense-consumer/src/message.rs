@@ -12,8 +12,9 @@ pub struct QueueMessage {
 pub struct JsonMessage {
     pub lat: f64,
     pub lon: f64,
-    pub timestamp: f64,
+    pub timestamp: i64,
     pub device_id: String,
+    pub bumpiness: i16,
 }
 
 impl QueueMessage {
