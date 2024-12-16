@@ -1,6 +1,10 @@
 import type { MetaFunction } from "@remix-run/node";
 import { ClientOnly } from "remix-utils/client-only";
 import Map from "../components/ui/map.client";
+import { useLoaderData } from "@remix-run/react";
+import { RoadBump } from "~/types/services";
+import { getRoadBumps } from "~/services/roadbumpservice";
+import { ErrorWithStatus } from "~/lib/errors";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,7 +13,36 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+interface LoaderData {
+  samples: RoadBump[];
+  error?: string;
+}
+
+export const loader = async () => {
+  // use service to fetch data from the API microservice
+  try {
+    const samples = await getRoadBumps();
+    return { samples };
+  } catch (error) {
+    if (error instanceof ErrorWithStatus || error instanceof Error) {
+      return {
+        samples: [],
+        error: error.message,
+      };
+    } else {
+      return {
+        samples: [],
+        error: "An error occurred while fetching data.",
+      };
+    }
+  }
+};
+
 export default function Index() {
+  // load points from the server
+  const loadedData = useLoaderData<LoaderData>();
+  console.log(loadedData);
+
   return (
     <div
       className="flex flex-col h-full"
