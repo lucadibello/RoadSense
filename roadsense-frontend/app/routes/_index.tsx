@@ -8,7 +8,7 @@ import { ErrorWithStatus } from "~/lib/errors";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "RoadSense - Remix App" },
+    { title: "RoadSense - Healthier Roads, Safer Journeys" },
     { name: "description", content: "Welcome to RoadSense!" },
   ];
 };

@@ -14,8 +14,9 @@ const Navbar: React.FC<NavbarProps> = () => {
             href="/"
             className="hover:text-accent hover:text-blue-600 transition-colors ease-in-out duration-300"
           >
-            RoadSense
+            RoadSense{" "}
           </a>
+          <span className="text-sm">| Healthier Roads, Safer Journeys</span>
         </div>
 
         {/* Right Section: Login/Sign Up or Profile */}

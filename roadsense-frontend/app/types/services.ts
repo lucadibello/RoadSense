@@ -3,7 +3,8 @@ export interface RoadBump {
   created_at: string;
   bumpiness_factor: number;
   location: {
-    latitude: number;
-    longitude: number;
+    x: number;
+    y: number;
+    srid: number; // Spatial Reference Identifier (SRID)
   };
 }
