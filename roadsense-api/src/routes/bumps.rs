@@ -5,8 +5,8 @@ use crate::{models::bumprecord::BumpRecord, AppState};
 
 #[derive(Debug, Serialize)]
 pub struct BumpApiResponse {
-    pub bumps: Option<Vec<BumpRecord>>,
-    pub message: String,
+    pub data: Option<Vec<BumpRecord>>,
+    pub message: Option<String>,
 }
 
 #[get("/bumps")]
@@ -22,8 +22,8 @@ pub async fn get_bump(app_state: web::Data<AppState>) -> Result<impl Responder> 
         Ok(bumps) => {
             // Build the response with the fetched bump records
             let response = BumpApiResponse {
-                message: "Bumps retrieved successfully".to_string(),
-                bumps: Some(bumps),
+                data: Some(bumps),
+                message: None,
             };
             Ok(web::Json(response))
         }
