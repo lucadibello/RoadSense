@@ -37,7 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="h-screen font-sans text-primary bg-primary-background">
         <Navbar />
         <main>{children}</main>
         <ScrollRestoration />
