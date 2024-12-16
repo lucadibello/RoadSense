@@ -1,12 +1,18 @@
 mod db;
+mod models;
+mod routes;
 
 use std::sync::{Arc, Mutex};
 
-use actix_web::{web::Data, App, HttpServer};
+use actix_web::{
+    web::{self, Data},
+    App, HttpServer,
+};
 use dotenv::dotenv;
 use log::{error, info};
+use routes::bumps::get_bump;
 
-struct AppState {
+pub struct AppState {
     db: Arc<Mutex<diesel::PgConnection>>,
 }
 
@@ -48,8 +54,13 @@ async fn main() -> std::io::Result<()> {
     }
 
     // Define and start HTTP server
-    HttpServer::new(move || App::new().app_data(app_data.clone()))
-        .bind((host.as_str(), port))?
-        .run()
-        .await
+    HttpServer::new(move || {
+        App::new()
+            .wrap(actix_web::middleware::Logger::default())
+            .app_data(app_data.clone())
+            .service(web::scope("/api/v1").service(get_bump))
+    })
+    .bind((host.as_str(), port))?
+    .run()
+    .await
 }
