@@ -8,6 +8,7 @@
 #include <rtos.h>
 #include <mutex>
 #include <events/mbed_events.h>
+#include <Ticker.h>
 
 // Avoid any macro collisions
 #undef Stream
@@ -27,6 +28,18 @@ rtos::Mutex buffer_mutex;
 
 RoadQualifier roadQualifier;
 RabbitMQClient rabbitMQClient;
+
+Ticker watchdog;
+const int watchdogTimeout = 10000; // 10 seconds
+bool watchdogTriggered = false;
+
+void kick() {
+    watchdog.detach(); // Stop the watchdog timer
+    watchdogTriggered = false;
+    watchdog.attach_ms(watchdogTimeout, []() {
+        watchdogTriggered = true;
+    });
+}
 
 class MyCircularBuffer {
 public:
@@ -96,13 +109,20 @@ void task1_function() {
             Serial.println("Failed to qualify segment.");
         }
 
-        ThisThread::sleep_for(1000); // 100 ms
     }
 }
 
 // Task 2: send data over RabbitMQ
 void task2_function() {
     SegmentQuality segmentQuality;
+    int failedAttempts = 0;
+    const int maxFailedAttempts = 5; // Maximum number of failed attempts before slowing down
+    const int slowDownDelay = 5000; // Delay in milliseconds after max failed attempts
+
+    // Start the watchdog timer
+    watchdog.attach_ms(watchdogTimeout, []() {
+        watchdogTriggered = true;
+    });
 
     while (true) {
         // Connect to WiFi
@@ -110,7 +130,6 @@ void task2_function() {
 
         while (rabbitMQClient.isConnectedWiFi()) {
             if (circular_buffer.get(segmentQuality)) {
-
                 rabbitMQClient.sendDataCallback(segmentQuality);
                 
                 Serial.print("Sent segment quality: ");
@@ -119,13 +138,28 @@ void task2_function() {
                 Serial.print(segmentQuality.longitude);
                 Serial.print(", ");
                 Serial.println(segmentQuality.quality);
+                
+                // Reset failed attempts counter on successful send
+                failedAttempts = 0;
+                kick(); // Reset the watchdog timer
             } else {
                 Serial.println("Buffer is empty. Waiting for data.");
             }
+        }
 
-        } 
+        // Increment failed attempts counter
+        failedAttempts++;
+
+        // If the watchdog is triggered, introduce a delay
+        if (watchdogTriggered) {
+            Serial.println("Watchdog triggered. Slowing down reconnection attempts.");
+            ThisThread::sleep_for(slowDownDelay);
+            watchdogTriggered = false; // Reset the watchdog trigger
+        } else {
+            // Short delay before next reconnection attempt
+            ThisThread::sleep_for(1000); // 1 second
+        }
     }
-    
 }
 
 void setup() {
