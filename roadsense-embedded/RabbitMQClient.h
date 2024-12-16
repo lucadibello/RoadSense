@@ -9,8 +9,12 @@
 
 
 // WiFi Credentials
-#define ssid "Galaxy S10 Lite"
+// #define ssid "Galaxy S10 Lite"
+// #define passwordWiFi "12345678"
+
+#define ssid "asfds"
 #define passwordWiFi "12345678"
+
 
 // MQTT Broker details
 #define host "192.168.58.103"
@@ -34,6 +38,11 @@ public:
             Serial.println("Connecting to WiFi...");
         }
         Serial.println("WiFi connected");
+    }
+
+    // Check if connected to WiFi
+    bool isConnectedWiFi() {
+        return WiFi.status() == WL_CONNECTED;
     }
 
     // Connect to RabbitMQ

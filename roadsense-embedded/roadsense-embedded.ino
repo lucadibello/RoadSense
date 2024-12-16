@@ -9,17 +9,24 @@
 #include <mutex>
 #include <events/mbed_events.h>
 
+// Avoid any macro collisions
+#undef Stream
 
 using namespace rtos;
 
-#define TIME_T1 1.0
+#define TIME_T2 1.0
 #define BUFFER_SIZE 10
 #define WATCHDOG_TIMEOUT 3.0  // Watchdog timeout in seconds
 #define SERIAL_BAUD 115200    // Serial baud rate
 
+
+rtos::Thread t1;
 rtos::Thread t2;
-mbed::Ticker task1;
+mbed::Ticker task2;
 rtos::Mutex buffer_mutex;
+
+RoadQualifier roadQualifier;
+RabbitMQClient rabbitMQClient;
 
 class MyCircularBuffer {
 public:
@@ -69,8 +76,61 @@ Watchdog &watchdog = Watchdog::get_instance();
 
 // Task 1: run the road qualifier
 void task1_function() {
-    RoadQualifier roadQualifier;
     SegmentQuality segmentQuality;
+
+    while (true) {
+        // Qualify a road segment
+        if (roadQualifier.qualifySegment()) {
+            segmentQuality = roadQualifier.getSegmentQuality();
+
+            // Add data to the buffer (overwriting oldest data if full)
+            circular_buffer.put(segmentQuality);
+
+            Serial.print("Added to buffer segment quality: ");
+            Serial.print(segmentQuality.latitude);
+            Serial.print(", ");
+            Serial.print(segmentQuality.longitude);
+            Serial.print(", ");
+            Serial.println(segmentQuality.quality);
+        } else {
+            Serial.println("Failed to qualify segment.");
+        }
+
+        ThisThread::sleep_for(1000); // 100 ms
+    }
+}
+
+// Task 2: send data over RabbitMQ
+void task2_function() {
+    SegmentQuality segmentQuality;
+
+    while (true) {
+        // Connect to WiFi
+        rabbitMQClient.connectWiFi();
+
+        while (rabbitMQClient.isConnectedWiFi()) {
+            if (circular_buffer.get(segmentQuality)) {
+
+                rabbitMQClient.sendDataCallback(segmentQuality);
+                
+                Serial.print("Sent segment quality: ");
+                Serial.print(segmentQuality.latitude);
+                Serial.print(", ");
+                Serial.print(segmentQuality.longitude);
+                Serial.print(", ");
+                Serial.println(segmentQuality.quality);
+            } else {
+                Serial.println("Buffer is empty. Waiting for data.");
+            }
+
+        } 
+    }
+    
+}
+
+void setup() {
+    Serial.begin(SERIAL_BAUD);
+    while (!Serial);
 
     // Initialize the road qualifier
     if (!roadQualifier.begin()) {
@@ -78,64 +138,7 @@ void task1_function() {
         return;
     }
 
-    // Qualify a road segment
-    if (roadQualifier.qualifySegment()) {
-        segmentQuality = roadQualifier.getSegmentQuality();
-
-        // Add data to the buffer (overwriting oldest data if full)
-        circular_buffer.put(segmentQuality);
-
-        Serial.print("Added to buffer segment quality: ");
-        Serial.print(segmentQuality.latitude);
-        Serial.print(", ");
-        Serial.print(segmentQuality.longitude);
-        Serial.print(", ");
-        Serial.println(segmentQuality.quality);
-    } else {
-        Serial.println("Failed to qualify segment.");
-    }
-
-    ThisThread::sleep_for(1000); // 100 ms
-
-}
-
-// Task 2: send data over RabbitMQ
-void task2_function() {
-    SegmentQuality segmentQuality;
-    RabbitMQClient rabbitMQClient;
-
-    // Connect to WiFi
-    rabbitMQClient.connectWiFi();
-
-    while (true) {
-        if (circular_buffer.get(segmentQuality)) {
-
-            rabbitMQClient.sendDataCallback(segmentQuality);
-            
-            Serial.print("Sent segment quality: ");
-            Serial.print(segmentQuality.latitude);
-            Serial.print(", ");
-            Serial.print(segmentQuality.longitude);
-            Serial.print(", ");
-            Serial.println(segmentQuality.quality);
-        } else {
-            Serial.println("Buffer is empty. Waiting for data.");
-        }
-
-        ThisThread::sleep_for(1000); // 100 ms
-    }
-}
-
-void setup() {
-    Serial.begin(SERIAL_BAUD);
-    while (!Serial);
-
-    Serial.println("asdf");
-
-    // start the ticker for task 1
-    task1.attach(task1_function, TIME_T1);
-
-    // start the thread for task 2
+    t1.start(task1_function);
     t2.start(task2_function);    
 }
 
