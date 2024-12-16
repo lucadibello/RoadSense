@@ -138,7 +138,7 @@ void setup() {
         return;
     }
 
-    t1.start(task1_function);
+    // t1.start(task1_function);
     t2.start(task2_function);    
 }
 

@@ -7,43 +7,57 @@
 #include <stdint.h>        // For uint8_t
 #include "SegmentQuality.h"
 
+struct WiFiCredentials {
+    const char* ssid;
+    const char* password;
+};
 
-// WiFi Credentials
-// #define ssid "Galaxy S10 Lite"
-// #define passwordWiFi "12345678"
-
-#define ssid "asfds"
-#define passwordWiFi "12345678"
+// List of WiFi credentials to connect to
+const WiFiCredentials wifiCredentials[] = {
+    {"Galaxy S10 Lite", "12345678"},
+    {"asfds", "12345678"}
+};
 
 
 // MQTT Broker details
 #define host "192.168.58.103"
 #define port 1883
 #define user "jam"
-#define password "jam"
-
-
+#define mqtt_password "jam" // Renamed to avoid conflict
 
 class RabbitMQClient {
 public:
     // Constructor with server, port, user, password
     RabbitMQClient()
-        : _host(host), _port(port), _user(user), _password(password), _wifiClient(), _mqttClient(_wifiClient), _errorCode(0), _ssid(ssid), _passwordWiFi(passwordWiFi) {}
+        : _host(host), _port(port), _user(user), _password(mqtt_password), _wifiClient(), _mqttClient(_wifiClient), _errorCode(0) {}
 
     // Connect to the WiFi
     void connectWiFi() {
-        while (WiFi.status() != WL_CONNECTED) {
-            WiFi.begin(_ssid, _passwordWiFi);
-            delay(1000);
-            Serial.println("Connecting to WiFi...");
+        for (const auto& credentials : wifiCredentials) {
+            WiFi.begin(credentials.ssid, credentials.password);
+            Serial.print("Connecting to WiFi: ");
+            Serial.println(credentials.ssid);
+
+            if (WiFi.status() == WL_CONNECTED) {
+                Serial.println("WiFi connected");
+                return;
+            } else {
+                Serial.println("Failed to connect to WiFi");
+            }
         }
-        Serial.println("WiFi connected");
+
+        Serial.println("Could not connect to any WiFi network");
     }
 
     // Check if connected to WiFi
     bool isConnectedWiFi() {
         return WiFi.status() == WL_CONNECTED;
     }
+
+    // Add a new WiFi credential
+    // void addWiFiCredential(const char* ssid, const char* password) {
+    //     wifiCredentials.push_back({ssid, password});
+    // }
 
     // Connect to RabbitMQ
     bool connect() {
@@ -118,9 +132,6 @@ private:
     uint16_t _port;
     const char* _user;
     const char* _password;
-    const char* _ssid;
-    const char* _passwordWiFi;
-
     WiFiClient _wifiClient;      // WiFi client for Portenta
     PubSubClient _mqttClient;    // MQTT client for communication
 
