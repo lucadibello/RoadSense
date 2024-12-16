@@ -1,0 +1,33 @@
+--- src/full_schema.rs	2024-12-16 16:27:29
++++ src/schema.rs	2024-12-16 16:29:17
+@@ -1,17 +1,11 @@
+ // @generated automatically by Diesel CLI.
+ 
+-pub mod sql_types {
+-    #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
+-    #[diesel(postgres_type(name = "geography"))]
+-    pub struct Geography;
+-}
+-
+ diesel::table! {
+     use diesel::sql_types::*;
+-    use super::sql_types::Geography;
++    use postgis_diesel::sql_types::*;
+ 
+     bump_records (id, created_at) {
+         id -> Int4,
+         device_id -> Text,
+         created_at -> Timestamptz,
+         bumpiness_factor -> Int2,
+@@ -31,10 +25,7 @@
+         srtext -> Nullable<Varchar>,
+         #[max_length = 2048]
+         proj4text -> Nullable<Varchar>,
+     }
+ }
+ 
+-diesel::allow_tables_to_appear_in_same_query!(
+-    bump_records,
+-    spatial_ref_sys,
+-);
++diesel::allow_tables_to_appear_in_same_query!(bump_records, spatial_ref_sys,);
