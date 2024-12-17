@@ -1,0 +1,291 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{url}
+
+\begin{document}
+
+\section*{RoadSense - Requirements and Specifications}
+
+The \textbf{RoadSense} project aims to develop an IoT-based system to detect and map road anomalies such as bumpiness and potholes. By installing sensor nodes on multiple vehicles, the system collects and analyzes road vibration data to create a detailed, interactive heatmap of road conditions. This information is invaluable for road maintenance planning, improving driver safety, and providing real-time alerts for hazardous conditions.
+
+The team consists of three members: Luca Di Bello, Georg Meyer, and Paolo Deidda.
+
+\subsection*{Objectives}
+
+This project aims to address the following objectives:
+
+\begin{enumerate}
+\item Develop a cost-effective IoT-based system to detect and map road anomalies.
+\item Quantify road bumpiness levels and provide real-time alerts for hazardous conditions.
+\item User-friendly interface for stakeholders to visualize road conditions and manage alerts.
+\item Improve the accuracy of road conditons by using multiple vehicles for data collection.
+\end{enumerate}
+
+\subsection*{Requirements}
+
+From the objectives outlined in the previous section, the team had identified the following requirements for the \textbf{RoadSense} project:
+
+\begin{enumerate}
+\item \textbf{Road heatmap}: Create an interactive web application that displays road conditions using a heatmap overlay (lighter colors for smoother roads, darker colors for rougher roads).
+
+\item \textbf{Alerting system}: The system should automatically create alerts when hazardous road conditions are detected and allow users to view, acknowledge, and resolve these alerts. Users should be also able to manually add alerts on the map.
+
+\item \textbf{Anomaly Differentiation}: Distinguish between normal road features (i.e. speed bumps, potholes, manholes, etc) and hazardous road conditions.
+
+\item \textbf{Road network coverage}: To achieve an extensive coverage of the road network and minimize discrepancies between single measurements an actual road state a swarm of sensor nodes installed in different cars is needed. Untilization of vehicles owned by public services (i.e. buses, dump trucks, etc.) can be utilized as well as vehicles of private volunteers. Further offers to businesses with large car fleets (i.e. Taxi companies, Ride Share companies, etc.) can be made to further increase measuring devices.
+
+\item \textbf{Continuous system calibration}: Each IoT device should be calibrated to the vehicle it is installed in, taking into account the vehicle's characteristics and driving conditions. This calibration should be simple and possibly automatically. This can be archieved by a first calibration phase coupled to an initial parameter set.
+
+\item \textbf{Scalability}: The system should be highly scalable to potentially handle data from thousands of vehicles simultaneously.
+
+\item \textbf{Centralized Data Management}: The server should be able to aggregate data from multiple IoT devices and store it efficiently for later analysis and visualization.
+
+\item \textbf{Optimized Data Transmission}: Since continuous data transmission can be costly for the user, the system should transmit data only when the vehicle is at established access points (e.g., Wi-Fi hotspots).
+
+\item \textbf{Power Supply}: The systems should be designed to operate using the vehicle's power source primarily, with a small backup battery to ensure that the data transmission is not interrupted if the vehicle is turned off.
+
+\item \textbf{Durability}: The sensor nodes should be robust and weatherproof to withstand various driving conditions to minimize effort and cost of maintenance for the end user.
+\end{enumerate}
+
+\subsection*{System design}
+
+The \textbf{RoadSense} system consists of the following components:
+
+\begin{itemize}
+\item \textbf{Sensor Nodes}: IoT devices installed in vehicles, responsible for collecting inertial data using an Inertial Measurement Unit (IMU) sensor and location data via a GPS module. These nodes should already compute a qualifier for localized road states to minimize data traffic to centralized hubs.
+
+\item \textbf{Server-Side Application}: Collects, aggregates, and analyzes data from multiple devices, and visualizes road quality using heatmaps.
+
+\item \textbf{Control Logic}: Defines the behavior of the IoT device in terms of data collection, processing, and communication.
+
+\item \textbf{User Interface}: An interactive web application allowing stakeholders to visualize road conditions and manage alerts.
+\end{itemize}
+
+\subsection*{Sensor Nodes}
+
+\subsubsection*{Specifications}
+
+\begin{enumerate}
+\item \textbf{Cost Restriction per node}: \~100 CHF
+   - As the number of vehicles the nodes will be high, th cost per node needs to be as small possible. To keep cost of installation and parts low, one single node/sensor package will be installed inside the vehicle.
+
+\item \textbf{Quantify felt RoadState}:
+   - The node is idealy placed centraly in the car, above one of the axles and mounted securely to the chassis to minimize errors.
+   - Roadstate will be quantified in a range of 0 (very good) to 14 (very bad) with a value of 15 for hazardous condition.
+
+\item \textbf{Adapt Quantification to different cars and driving states}:
+   - A simple linear Mass-Spring-Damper Model is chosen to model the cars factor on the transduced shocks. (While keeping computational effort low.)
+   - A first calibration phase coupled to a initial parameter set aims to fit Mass-Spring-Damper Model parameters.
+   - Measured data will be fit to quantified values during calibration phase.
+   - Further physical quatities other than z-axis acceleration have to be considered to decouple driving induced accelerations from the road state.
+
+\item \textbf{High Polling rate of IMU measurements}:
+   - As shocks induced by road bumps have a very short period, where the period and amplitude of the induced acceleration is proportional to vehicle speed. The polling rate needs to be chosen high enough to ensure reliable sensor readings for road specific driving speeds.
+
+\item \textbf{Sensing of physical quantities}:
+   \begin{enumerate}
+   \item \textbf{Acceleration in z-Axis} to determine road state and potholes. (Adapt pollingrate to vehicle velocity/ must be high enough)
+   \item \textbf{Acceleration in x,y-Axis and rotational acceleration} to minimize errors induced from driving scenarios.
+   \item \textbf{Driving Velocity} to couple shock amplitudes to velocity (through Spring-Damper Model).
+   \item \textbf{Geographical Position} to reference qualification to current position.
+   \item \textbf{Driving Direction} to deduce road lane (use gps data).
+   \end{enumerate}
+
+\item \textbf{Transmit Data at established Gatepoints}
+   \begin{enumerate}
+   \item Transmitted information Format:
+      - (Node ID (2 Byte)) | Position (2 * 4 Byte (SP FP)) | RoadState (0.5 Byte)
+   \item Preprocess and save (Position, Quality)-Tuples locally on Node
+   \item Automatically establish connection at gatepoints and transmit new gathered data
+   \end{enumerate}
+\end{enumerate}
+
+\subsubsection*{RT-UML with State Charts}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{../assets/diagrams/edge_node_rtuml/edge_node_rtuml.svg}
+\caption{RT-UML of a Sensor Node}
+\end{figure}
+
+\subsubsection*{Hardware Components}
+
+\begin{enumerate}
+\item \textbf{Microcontroller}:
+   - \textbf{Arduino Nano 33 IoT} or similar with built-in Wi-Fi capability.
+
+\item \textbf{IMU Sensor}:
+   - \textbf{MPU-6050} or \textbf{MPU-9250} accelerometer and gyroscope module.
+
+\item \textbf{GPS Module}:
+   - \textbf{Ublox NEO-6M} GPS module for accurate positioning.
+
+\item \textbf{Power Supply}:
+   - \textbf{Primary}: Connected to the vehicle's power supply.
+   - \textbf{Backup}: Rechargeable Li-Po battery with voltage regulation.
+
+\item \textbf{Enclosure}:
+   - Durable casing with LEDs for status indication (e.g., transmission activity, errors).
+
+\item \textbf{Connectivity}:
+   - Wi-Fi module (if not integrated) like \textbf{ESP8266} or \textbf{ESP32}.
+\end{enumerate}
+
+\subsubsection*{Firmware Development}
+
+- \textbf{Sensor Calibration}:
+  - Implement routines to calibrate measurements/models from the IMU sensor for accurate readings.
+
+- \textbf{Data Sampling}:
+  - Sample sensor data at appropriate intervals fitting to vehicle speed (e.g., 50 Hz).
+
+- \textbf{Noise Reduction}:
+  - Apply Kalman Filter or Complementary Filter to fuse sensor data.
+  - Use moving averages or median filters to smooth out transient spikes.
+
+- \textbf{Baseline Adjustment}:
+  - Establish a baseline for the vehicle's normal vibrations.
+  - Adjust subsequent readings by subtracting the baseline values.
+
+- \textbf{Wi-Fi Connectivity}:
+  - Configure to connect to known Wi-Fi networks.
+  - Implement setup mode for inputting Wi-Fi credentials.
+
+- \textbf{Data Packaging}:
+  - Format data (timestamp, GPS coordinates, vibration metrics) for transmission.
+
+- \textbf{Data Transmission}:
+  - Use HTTP/HTTPS protocols to send data to the server.
+  - Implement error handling and retries for network issues.
+
+- \textbf{Power Management}:
+  - Monitor power source and switch between vehicle power and backup battery as needed.
+  - Implement sleep modes when the vehicle is not in motion.
+
+\subsubsection*{Data Processing and Noise Reduction}
+
+- \textbf{Calibration Period}:
+  - Collect initial data to establish the vehicle's baseline vibration patterns.
+  - Dynamically adjust the baseline to account for changes (e.g., vehicle load).
+
+- \textbf{Filtering Techniques}:
+  - \textbf{Low-Pass Filter}: Remove high-frequency noise unrelated to road conditions.
+  - \textbf{High-Pass Filter}: Eliminate low-frequency movements like vehicle tilts.
+  - \textbf{Band-Pass Filter}: Focus on frequencies corresponding to road-induced vibrations.
+
+- \textbf{Statistical Methods}:
+  - \textbf{Standard Deviation and Variance}: Measure dispersion of vibration data.
+  - \textbf{Peak Detection}: Identify significant deviations indicating bumps or potholes.
+  - \textbf{Thresholding}: Categorize road conditions based on vibration intensity thresholds.
+
+- \textbf{Edge Computing}:
+  - \textbf{Data Compression}: Reduce data size by transmitting only significant events.
+  - \textbf{Event Detection}: Implement on-device logic to detect and report anomalies.
+  - \textbf{Power Efficiency}: Optimize code to reduce processor load and conserve battery life.
+
+\subsection*{System Architecture}
+
+The \textbf{RoadSense} consists of multiple IoT devices installed in vehicles, communicating with a central server designed to be highly scalable to handle data from thousands of devices.
+
+\subsubsection*{IoT Data Pipeline}
+
+The data pipeline has been designed with scalability in mind, allowing for efficient data collection, processing, and data analysis from multiple (potentially thousands) concurrent IoT devices. The following diagram illustrates the pipeline steps, from data ingestion to the storage of processed data.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{../assets/diagrams/iot_data_pipeline/iot_data_pipeline.svg}
+\caption{IoT Data Pipeline}
+\end{figure}
+
+The pipeline consists of the following components:
+
+\begin{enumerate}
+\item \textbf{Data ingestion}: IoT devices collect vibration, GPS, and other relevant data points. When the vehicle reaches an access point, the data will be transmitted to the server.
+
+\item \textbf{Authentication and security}: Each device is authenticated before data transmission to ensure data integrity and prevent unauthorized access. For this purpose, we chose to use \href{https://www.keycloak.org/}{Keycloak} for identity and access management.
+
+\item \textbf{Geographical distribution}: The server leverages DNS-based load balancing to distribute incoming data across regional gateways for efficient processing. We have chosen to use \href{https://www.isc.org/bind/}{BIND9} for DNS-based load balancing along with \href{https://www.maxmind.com/en/geoip2-databases}{GeoIP} for geolocation. Each regional gateway will be responsible for routing the user requests to the regional message queuing system. For this purpose, we will use \href{https://traefik.io/}{Traefik} as the reverse proxy.
+
+\item \textbf{Message queues}: Each gateway node processes incoming data and forwards it to a regional queuing system to allow for parallel processing. After evaluating multiple options, we decided to use \href{https://www.rabbitmq.com/}{RabbitMQ} as the message queue system. To ensure high availability, we will deploy RabbitMQ in a cluster configuration (refer to the \href{https://www.rabbitmq.com/clustering.html}{RabbitMQ Clustering Guide}).
+
+\item \textbf{Data preprocessing}: Each region has a set of preprocessing microservices that consume incoming data from the regional message queuing system, perform data validation, and run initial data processing tasks. These microservices are deployed using containerization technology like Docker and in a future production environment, managed by \href{https://kubernetes.io/}{Kubernetes}. Since we want to ensure high-performance data processing, and a small memory footprint, we chose to use \href{https://golang.org/}{Go} as the primary language for these microservices.
+
+\item \textbf{Data storage}: Processed data is stored in a scalable database system that can handle high volumes of data. Since we are dealing with both date-time and geospatial data, we chose to use \href{https://www.timescale.com/}{TimescaleDB} as the database system with the \href{https://postgis.net/}{PostGIS} extension to support geospatial queries. To ensure data durability and high availability, we will deploy TimescaleDB in a clustered configuration.
+\end{enumerate}
+
+\subsubsection*{Client-Server Architecture}
+
+This section describes the client-server architecture of the system, focusing on the interaction between the web application and the server-side components. The following diagram illustrates how the client (web browser) interacts with the server to load and visualize collected data:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth]{../assets/diagrams/web_app_architecture/web_app_architecture.svg}
+\caption{Client-Server Architecture}
+\end{figure}
+
+The pipeline consists of the following components:
+
+\begin{enumerate}
+\item \textbf{Clients}: The application users (agents or web browsers) interact with the web application to view road conditions, manage alerts, and access other features.
+
+\item \textbf{Authentication}: To manage user access and permissions, users need to authenticate themselves. For this purpose, we will use the same instance of \href{https://www.keycloak.org/}{Keycloak} that is used for IoT device authentication. To have a greater division between IoT devices and users, we will employ different realms in Keycloak (refer to the \href{https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms}{Keycloak Documentation}).
+
+\item \textbf{Geographical distribution}: API requests are routed to the regional API gateways using DNS-based load balancing. We will use the same \href{https://www.isc.org/bind/}{BIND9} + \href{https://www.maxmind.com/en/geoip2-databases}{GeoIP} + \href{https://traefik.io/}{Traefik} setup as described in the IoT data pipeline section.
+
+\item \textbf{API Workers}: Each region has a set of API worker microservices that will handle incoming API requests, query the database, and return the requested data to the client. These microservices will be deployed using containerization technology like Docker and managed by \href{https://kubernetes.io/}{Kubernetes} in a future production environment. Furthermore, they will be developed using \href{https://golang.org/}{Go} to enhance the application performance.
+
+\item \textbf{Database cluster}: API workers connect to the database cluster containing the aggregated IoT data, allowing them to retrieve the necessary information for the client requests.
+\end{enumerate}
+
+\subsection*{Possible Problems and Solutions}
+
+\subsubsection*{Network Connectivity}
+
+- \textbf{Wi-Fi Availability}:
+  - \textbf{Challenge}: Continuous Wi-Fi connectivity may not be available during travel.
+  - \textbf{Solution}: Store data locally and transmit when connectivity is available.
+  - \textbf{Alternative}: Use mobile hotspots or integrate GSM modules for cellular data.
+
+- \textbf{Data Security}:
+  - Encrypt data transmissions to prevent interception or tampering.
+
+- \textbf{Error Handling}:
+  - Implement robust error handling for network disruptions.
+
+\subsubsection*{Vehicle Variability}
+
+- \textbf{Machine Learning Models}:
+  - Train models to adjust for different vehicle characteristics.
+
+- \textbf{User Input}:
+  - Allow users to specify vehicle type during device setup for better calibration.
+
+- \textbf{Adaptive Algorithms}:
+  - Continuously learn and adapt to the vehicle's behavior over time.
+
+\subsubsection*{Power Management}
+
+- \textbf{Sleep Modes}:
+  - Implement low-power modes when the vehicle is stationary.
+
+- \textbf{Efficient Components}:
+  - Use low-power sensors and microcontrollers.
+
+- \textbf{Power Monitoring}:
+  - Provide alerts when battery levels are low.
+
+\subsubsection*{Data Volume Management}
+
+- \textbf{Data Sampling}:
+  - Optimize sampling rates to balance data quality and volume.
+
+- \textbf{Selective Reporting}:
+  - Transmit only aggregated or significant data points.
+
+- \textbf{Data Compression}:
+  - Compress data before transmission to reduce bandwidth usage.
+
+\end{document}

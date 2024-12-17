@@ -1,0 +1,74 @@
+\documentclass[12pt,a4paper]{report}
+
+%-------------------------------------------------
+%   PACKAGES & CUSTOMIZATION
+%-------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}               % Modern Latin font
+\usepackage[english]{babel}
+\usepackage[margin=1in]{geometry}  % Adjust margins
+\usepackage{setspace}              % For line spacing
+\usepackage{amsmath,amssymb}       % Math packages
+\usepackage{graphicx}              % For including figures
+\usepackage{booktabs}              % For professional-quality tables
+\usepackage{hyperref}              % Hyperlinks in PDF
+\usepackage{caption}               % Improved captions
+\usepackage{subcaption}            % Subfigures
+\usepackage{enumitem}              % Better list environments
+
+% Optional: Bibliography package if needed
+%\usepackage[backend=biber,style=apa]{biblatex}
+%\addbibresource{references.bib}
+
+% One-and-a-half line spacing
+%\onehalfspacing
+
+%-------------------------------------------------
+%   TITLE PAGE INFORMATION
+%-------------------------------------------------
+\title{Report: Roadsense \\ \vspace{0.5em}
+\Large Edge Computing in the IoT}
+
+\author{Luca Di Bello, Paolo Deidda, Nawfal Abdul Malick, Georg Meyer \\[1em]
+Semester-project}
+
+\date{Due: 20 December 2024}
+
+%-------------------------------------------------
+%   BEGIN DOCUMENT
+%-------------------------------------------------
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\listoffigures
+
+%-------------------------------------------------
+%   CHAPTER 1: System Design
+%-------------------------------------------------
+\chapter{System Design}
+\input{system_design/introduction.tex}
+\input{system_design/overview.tex}
+\input{system_design/sensor_nodes.tex}
+\input{system_design/system_architecture.tex}
+
+%-------------------------------------------------
+%   CHAPTER 2: Description of system implementation
+%-------------------------------------------------
+\chapter{System Implementation}
+
+%-------------------------------------------------
+%   CHAPTER 3: Results
+%-------------------------------------------------
+\chapter{Results}
+
+
+
+%-------------------------------------------------
+% BIBLIOGRAPHY (IF NEEDED)
+%-------------------------------------------------
+%\printbibliography
+
+\end{document}
