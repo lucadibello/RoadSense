@@ -1,6 +1,9 @@
 import type { MetaFunction } from "@remix-run/node";
 import { ClientOnly } from "remix-utils/client-only";
 import Map from "../components/ui/map.client";
+import { useState } from "react";
+import { BumpFilter, severityFilters } from "~/util/bumpfilter";
+import { BumpSeverity } from "~/types/bumps";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,35 +12,60 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-// interface LoaderData {
-//   samples: RoadBump[];
-//   error?: string;
-// }
+type AvailableFilter = { name: string; filter: BumpFilter; order: number };
 
-// export const loader = async () => {
-//   // use service to fetch data from the API microservice
-//   try {
-//     const samples = await getRoadBumps();
-//     return { samples };
-//   } catch (error) {
-//     if (error instanceof ErrorWithStatus || error instanceof Error) {
-//       return {
-//         samples: [],
-//         error: error.message,
-//       };
-//     } else {
-//       return {
-//         samples: [],
-//         error: "An error occurred while fetching data.",
-//       };
-//     }
-//   }
-// };
+// Filters mapped for user selection
+const availableFilters: AvailableFilter[] = [
+  {
+    name: `Smooth (<= ${BumpSeverity.Smooth})`,
+    filter: severityFilters.smooth,
+    order: 0,
+  },
+  {
+    name: `Minor (${BumpSeverity.Smooth + 1}-${BumpSeverity.Minor})`,
+    filter: severityFilters.minor,
+    order: 1,
+  },
+  {
+    name: `Moderate (${BumpSeverity.Minor + 1}-${BumpSeverity.Moderate})`,
+    filter: severityFilters.moderate,
+    order: 2,
+  },
+  {
+    name: `Major (${BumpSeverity.Moderate + 1}-${BumpSeverity.Major})`,
+    filter: severityFilters.major,
+    order: 3,
+  },
+  {
+    name: `Severe (> ${BumpSeverity.Major})`,
+    filter: severityFilters.severe,
+    order: 4,
+  },
+];
 
 export default function Index() {
-  // load points from the server
-  // const loadedData = useLoaderData<LoaderData>();
-  // console.log(loadedData);
+  // State to hold selected filters as AvailableFilter[]
+  const [selectedFilters, setSelectedFilters] = useState<AvailableFilter[]>([]);
+
+  // Toggle filter function
+  const toggleFilter = (filter: AvailableFilter) => {
+    setSelectedFilters((prevFilters) => {
+      if (prevFilters.includes(filter)) {
+        return prevFilters.filter((f) => f !== filter); // Remove filter
+      } else {
+        return [...prevFilters, filter]; // Add filter
+      }
+    });
+  };
+
+  // Prepare filters as a combined function
+  const combinedFilters: BumpFilter | null =
+    selectedFilters.length > 0
+      ? (bumps) =>
+          selectedFilters
+            .map((f) => f.filter(bumps)) // Apply all selected filters
+            .flat() // Flatten the results
+      : null;
 
   return (
     <div
@@ -51,23 +79,38 @@ export default function Index() {
         {/* Map Section */}
         <div className="flex-1 relative">
           <ClientOnly fallback={<div>Loading map...</div>}>
-            {() => <Map />}
+            {() => <Map filters={combinedFilters ? [combinedFilters] : []} />}
           </ClientOnly>
         </div>
 
         {/* Options Panel */}
         <div className="w-1/4 bg-gray-100 p-4 border-l border-gray-300">
           <div className="text-center mb-4">
-            <h2 className="text-xl font-bold">Options</h2>
+            <h2 className="text-xl font-bold">Filter Options</h2>
           </div>
-          {/* Example Options */}
+
+          {/* Checkboxes for Filters */}
           <div>
-            <p className="text-sm">Here you can add controls like:</p>
-            <ul className="list-disc list-inside text-sm">
-              <li>Fetch range slider</li>
-              <li>Enable/Disable heatmap</li>
-              <li>Other configurations</li>
-            </ul>
+            {availableFilters.map((availableFilter) => (
+              <div
+                key={availableFilter.name}
+                className="flex items-center mb-2"
+              >
+                <input
+                  type="checkbox"
+                  id={availableFilter.name}
+                  onChange={() => toggleFilter(availableFilter)}
+                  checked={selectedFilters.includes(availableFilter)}
+                  className="mr-2"
+                />
+                <label
+                  htmlFor={availableFilter.name}
+                  className="text-sm cursor-pointer"
+                >
+                  {availableFilter.name}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
       </div>
