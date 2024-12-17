@@ -7,7 +7,6 @@
 #include "SegmentQuality.h"
 
 
-
 // Define constants
 // For debugging output, uncomment the following line
 #define DEBUG
@@ -168,7 +167,7 @@ class RoadQualifier {
     bool isReady(); // Check if class is ready
     bool qualifySegment(); // Analyze a <SEGMENT_LENGTH>m road segment (returns false if segment is invalid)
     SegmentQuality getSegmentQuality();  // Return the quality of the last validly qualified segment (only call after qualifySegment() returns true)
-                    
+    bool deleteCalibrationFromFlash(); // Delete calibration data from flash memory (returns false if failed)               
 
   private:
     // ----- Sensor objects ----- //
@@ -700,5 +699,46 @@ bool RoadQualifier::saveCalibrationToFlash() {
   }
 
   Serial.println("Calibration saved to flash.");
+  return true;
+}
+
+bool RoadQualifier::deleteCalibrationFromFlash() {
+  initFlashMemory();
+  
+  if (!flashInitialized || !flashBD) {
+      Serial.println("Flash memory not initialized.");
+      return false;
+  }
+
+  Serial.println("Erasing calibration data from flash...");
+
+  size_t dataSize = sizeof(CalibrationData);
+  size_t eraseBlocks = (dataSize + eraseBlockSize - 1) / eraseBlockSize;
+
+  // Erase the flash region where calibration data is stored
+  int err = flashBD->erase(0, eraseBlocks * eraseBlockSize);
+  if (err != 0) {
+      Serial.println("Failed to erase calibration data from flash.");
+      return false;
+  }
+
+  // Verify that the calibration data is actually erased
+  CalibrationData calData;
+  memset(&calData, 0, sizeof(CalibrationData));
+  flashBD->read(&calData, 0, sizeof(CalibrationData));
+
+  // After erase, flash is typically 0xFF, so signature should not match CALIBRATION_SIGNATURE
+  if (calData.signature == CALIBRATION_SIGNATURE) {
+      Serial.println("Warning: Calibration signature still present after erase!");
+      Serial.println("This may indicate hardware or flash configuration issues.");
+      return false;
+  }
+
+  // Reset in-memory calibration values
+  minZAccDifference = 0;
+  maxZAccDifference = 0;
+
+  Serial.println("Calibration data erased from flash successfully.");
+
   return true;
 }
