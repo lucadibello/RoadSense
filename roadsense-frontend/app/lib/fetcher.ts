@@ -2,7 +2,6 @@ import { BaseApiResponse } from "~/types/api";
 import { ErrorWithStatus } from "./errors";
 
 export const fetcher = async <T>(url: string, options: RequestInit = {}) => {
-  console.log("fetcher", url, options);
   const res = await fetch(url, options);
   if (!res.ok) {
     // read body if present
