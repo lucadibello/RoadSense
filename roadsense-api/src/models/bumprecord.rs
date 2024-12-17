@@ -39,12 +39,13 @@ impl BumpRecord {
             .filter(st_intersects(
                 // our location column
                 roadsense_diesel::schema::bump_records::location,
-                // the polygon representing the map bounds
+                // The polygon representing the map bounds (closed loop)
                 Polygon::new(Some(SRID))
                     .add_point(Point::new(east, north, Some(SRID)))
                     .add_point(Point::new(east, south, Some(SRID)))
                     .add_point(Point::new(west, south, Some(SRID)))
                     .add_point(Point::new(west, north, Some(SRID)))
+                    .add_point(Point::new(east, north, Some(SRID))) // Close the polygon
                     .clone(),
             ))
             .select(BumpRecord::as_select())
