@@ -77,7 +77,8 @@ function HeatMap({ bumps }: HeatMapProps) {
     const heatMapData = bumps.map((bump) => [
       bump.location.y,
       bump.location.x,
-      bump.bumpiness_factor,
+      ((bump.bumpiness_factor - BumpSeverity.Smooth) / BumpSeverity.Severe) *
+        100,
     ]);
 
     const heatLayer = L.heatLayer(heatMapData).addTo(map);
