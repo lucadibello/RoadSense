@@ -10,6 +10,8 @@
 // Define constants
 // For debugging output, uncomment the following line
 #define DEBUG
+// To delete calibration data from flash memory, uncomment the following line
+//#define DELETE_CALIBRATION
 
 // Define dummy sensor modules for testing without actual hardware
 // Comment out to use actual hardware
@@ -19,7 +21,9 @@
 #define GPS_BAUD 9600         // GPS module baud rate
 
 #define MAX_GPS_WAIT 20000    // Maximum time to wait for GPS data in milliseconds
+#define CALIBRATION_TIME_INITIAL_WAIT 5000
 #define CALIBRATION_TIME 20000 // Calibration time in milliseconds
+#define MIN_CALIBRATION_VALUE 2000 // Minimum value for calibration to avoid noise from sensor
 #define SEGMENT_LENGTH 1.    // Length of road segment in meters
 #define DELAY_AFTER_ITERATION 5 // Delay after each iteration in milliseconds (change for different numbers of iterations)
 
@@ -257,9 +261,17 @@ bool RoadQualifier::begin() {
     return false;
   }
 
+  #ifdef DELETE_CALIBRATION
+  if (!deleteCalibrationFromFlash()) {
+    Serial.println("Failed to delete calibration data from flash.");
+    return false;
+  }
+  delay(60000); // Wait for 1 minute to allow user to see the message
+  #endif
+
   if (!loadCalibrationFromFlash()) {
     Serial.println("No valid calibration found. Starting calibration...");
-    if (!calibrate(20000)) { // calibrate for 20 seconds
+    if (!calibrate(CALIBRATION_TIME)) { // calibrate for CALIBRATION_TIME ms
       Serial.println("Calibration failed.");
       return false;
     }
@@ -592,9 +604,11 @@ uint8_t RoadQualifier::quantifyToByte(int32_t value, int32_t minValue, int32_t m
 
 bool RoadQualifier::calibrate(unsigned long calibrationTime) {
   Serial.println("Calibrating accelerations...");
+  delay(CALIBRATION_TIME_INITIAL_WAIT);
+
   unsigned long endTime = millis() + calibrationTime;
   
-  minZAccDifference = 0;
+  minZAccDifference = MAX_INT16_VALUE;
   maxZAccDifference = 0;
 
   mpu.getAcceleration(&dummyAcc, &dummyAcc, &currentZAcceleration);
@@ -608,7 +622,7 @@ bool RoadQualifier::calibrate(unsigned long calibrationTime) {
     if (accelerationDifference > maxZAccDifference)
       maxZAccDifference = accelerationDifference;
 
-    if ((accelerationDifference < minZAccDifference) || (minZAccDifference == 0))
+    if ((accelerationDifference < minZAccDifference) && (accelerationDifference > MIN_CALIBRATION_VALUE))
       minZAccDifference = accelerationDifference;
     
     delay(5);
