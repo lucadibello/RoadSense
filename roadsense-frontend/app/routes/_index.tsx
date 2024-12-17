@@ -46,6 +46,8 @@ const availableFilters: AvailableFilter[] = [
 export default function Index() {
   // State to hold selected filters as AvailableFilter[]
   const [selectedFilters, setSelectedFilters] = useState<AvailableFilter[]>([]);
+  // State to save whether we need to show the heatmap of the single markings
+  const [showHeatmap, setShowHeatmap] = useState<boolean>(false);
 
   // Toggle filter function
   const toggleFilter = (filter: AvailableFilter) => {
@@ -79,7 +81,12 @@ export default function Index() {
         {/* Map Section */}
         <div className="flex-1 relative">
           <ClientOnly fallback={<div>Loading map...</div>}>
-            {() => <Map filters={combinedFilters ? [combinedFilters] : []} />}
+            {() => (
+              <Map
+                filters={combinedFilters ? [combinedFilters] : []}
+                showHeatmap={showHeatmap}
+              />
+            )}
           </ClientOnly>
         </div>
 
@@ -91,6 +98,7 @@ export default function Index() {
 
           {/* Checkboxes for Filters */}
           <div>
+            <p className="text-sm font-semibold">Severity Filters</p>
             {availableFilters.map((availableFilter) => (
               <div
                 key={availableFilter.name}
@@ -111,6 +119,22 @@ export default function Index() {
                 </label>
               </div>
             ))}
+          </div>
+
+          <div className="mt-4">
+            <p className="text-sm font-semibold">Display Options</p>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="showHeatmap"
+                onChange={() => setShowHeatmap((prev) => !prev)}
+                checked={showHeatmap}
+                className="mr-2"
+              />
+              <label htmlFor="showHeatmap" className="text-sm cursor-pointer">
+                Show Heatmap
+              </label>
+            </div>
           </div>
         </div>
       </div>

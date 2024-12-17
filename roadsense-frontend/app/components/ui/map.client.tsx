@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   useMapEvent,
+  useMap,
 } from "react-leaflet";
+import "leaflet.heat";
 import type { LatLngTuple } from "leaflet";
 import L from "leaflet";
 import { RoadBump } from "~/types/services";
@@ -20,7 +22,7 @@ const getMarkerColor = (bumpiness_factor: number) => {
   if (bumpiness_factor <= BumpSeverity.Moderate) return "#FFFF00"; // Yellow
   if (bumpiness_factor <= BumpSeverity.Major) return "#FFA500"; // Orange
   if (bumpiness_factor <= BumpSeverity.Severe) return "#FF0000"; // Red - Severe
-  return "#800080"; // Purple - Extreme (not defined as it should never happpen...)
+  return "#800080"; // Purple - Extreme (not defined as it should never happen...)
 };
 
 // Function to create a custom icon for markers
@@ -64,11 +66,36 @@ function FetchBumps({ setBumps, filters }: FetchBumpsProps) {
   return null;
 }
 
-interface MapProps {
-  filters?: BumpFilter[];
+interface HeatMapProps {
+  bumps: RoadBump[];
 }
 
-export default function Map({ filters = [] }: MapProps) {
+function HeatMap({ bumps }: HeatMapProps) {
+  const map = useMap();
+
+  useEffect(() => {
+    const heatMapData = bumps.map((bump) => [
+      bump.location.y,
+      bump.location.x,
+      bump.bumpiness_factor,
+    ]);
+
+    const heatLayer = L.heatLayer(heatMapData).addTo(map);
+
+    return () => {
+      heatLayer.remove(); // Cleanup on component unmount or rerender
+    };
+  }, [bumps, map]);
+
+  return null;
+}
+
+interface MapProps {
+  filters?: BumpFilter[];
+  showHeatmap?: boolean; // New prop to toggle heatmap display
+}
+
+export default function Map({ filters = [], showHeatmap = false }: MapProps) {
   const position: LatLngTuple = [46.0109711, 8.9606471];
   const [bumps, setBumps] = useState<RoadBump[]>([]);
 
@@ -85,24 +112,30 @@ export default function Map({ filters = [] }: MapProps) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <FetchBumps setBumps={setBumps} filters={filters} />
-        {bumps.map((bump, idx) => {
-          const color = getMarkerColor(bump.bumpiness_factor);
-          return (
-            <Marker
-              key={idx}
-              position={[bump.location.y, bump.location.x]}
-              icon={createCustomIcon(color)}
-            >
-              <Popup>
-                Bumpiness Factor: {bump.bumpiness_factor} <br />
-                Device: {bump.device_id} <br />
-                Latitude: {bump.location.x} <br />
-                Longitude: {bump.location.y} <br />
-                Time: {new Date(bump.created_at).toLocaleString()}
-              </Popup>
-            </Marker>
-          );
-        })}
+
+        {/* Conditional rendering of HeatMap or Markers */}
+        {showHeatmap ? (
+          <HeatMap bumps={bumps} />
+        ) : (
+          bumps.map((bump, idx) => {
+            const color = getMarkerColor(bump.bumpiness_factor);
+            return (
+              <Marker
+                key={idx}
+                position={[bump.location.y, bump.location.x]}
+                icon={createCustomIcon(color)}
+              >
+                <Popup>
+                  Bumpiness Factor: {bump.bumpiness_factor} <br />
+                  Device: {bump.device_id} <br />
+                  Latitude: {bump.location.x} <br />
+                  Longitude: {bump.location.y} <br />
+                  Time: {new Date(bump.created_at).toLocaleString()}
+                </Popup>
+              </Marker>
+            );
+          })
+        )}
       </MapContainer>
     </div>
   );
