@@ -13,4 +13,3 @@ CREATE TABLE bump_records (
 
 -- Create a hypertable in TimescaleDB
 SELECT create_hypertable('bump_records', 'created_at');
-
