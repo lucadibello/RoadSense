@@ -1,7 +1,8 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::{prelude::Queryable, PgConnection, Selectable};
-use postgis_diesel::types::Point;
+use postgis_diesel::functions::st_intersects;
+use postgis_diesel::types::{Point, Polygon};
 use roadsense_diesel::schema::bump_records::dsl::*;
 use serde::Serialize;
 
@@ -17,8 +18,35 @@ pub struct BumpRecord {
 }
 
 impl BumpRecord {
-    pub fn get_all(conn: &mut PgConnection) -> QueryResult<Vec<BumpRecord>> {
+    pub fn _get_all(conn: &mut PgConnection) -> QueryResult<Vec<BumpRecord>> {
         bump_records
+            .select(BumpRecord::as_select())
+            .load::<BumpRecord>(conn)
+    }
+
+    pub fn get_all_in_bounds(
+        conn: &mut PgConnection,
+        north: f64,
+        south: f64,
+        east: f64,
+        west: f64,
+    ) -> QueryResult<Vec<BumpRecord>> {
+        // Define the SRID for the location column (4326 for WGS84)
+        const SRID: u32 = 4326;
+
+        // Query the database for all bump records in the bounds
+        bump_records
+            .filter(st_intersects(
+                // our location column
+                roadsense_diesel::schema::bump_records::location,
+                // the polygon representing the map bounds
+                Polygon::new(Some(SRID))
+                    .add_point(Point::new(east, north, Some(SRID)))
+                    .add_point(Point::new(east, south, Some(SRID)))
+                    .add_point(Point::new(west, south, Some(SRID)))
+                    .add_point(Point::new(west, north, Some(SRID)))
+                    .clone(),
+            ))
             .select(BumpRecord::as_select())
             .load::<BumpRecord>(conn)
     }

@@ -16,3 +16,4 @@ chrono = { version = "0.4.39", features = ["serde"] }
 # Load other subproject containing diesel types
 roadsense-diesel = { path = "../roadsense-diesel" }
 postgis_diesel = { version = "2.4.1", features = ["serde"] }
+actix-cors = "0.7.0"
