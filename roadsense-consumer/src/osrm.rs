@@ -6,6 +6,7 @@ use serde::Deserialize;
 
 // Root response
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct OSRMResponse {
     pub code: String,
     pub matchings: Vec<Matching>,
@@ -20,6 +21,7 @@ pub struct OSRMErrorResponse {
 
 // Matching block
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Matching {
     pub confidence: f64,
     pub geometry: Geometry,
@@ -32,6 +34,7 @@ pub struct Matching {
 
 // Geometry (LineString)
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Geometry {
     #[serde(rename = "type")]
     pub geo_type: String,
@@ -40,6 +43,7 @@ pub struct Geometry {
 
 // Legs
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Leg {
     pub summary: String,
     pub weight: f64,
@@ -54,6 +58,7 @@ pub struct Step {}
 
 // Tracepoint
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Tracepoint {
     pub waypoint_index: usize,
     pub matchings_index: usize,
