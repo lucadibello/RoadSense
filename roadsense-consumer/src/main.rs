@@ -68,7 +68,7 @@ async fn main() {
     // Array to store bunch of messages
     let mut batch = Vec::<Arc<JsonMessage>>::with_capacity(batch_size);
 
-    // FIXME: Just for test, we will add some points to the queue
+    // start processing messages
     loop {
         // Wait for a message or timeout
         let result = timeout(Duration::from_secs(timeout_secs), rx.recv()).await;
