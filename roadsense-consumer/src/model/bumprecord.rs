@@ -17,7 +17,7 @@ pub struct BumpRecordInsert {
 }
 
 // Function to process and insert a batch of records
-pub fn process_batch(
+pub async fn process_batch(
     conn: &mut PgConnection,
     records: &[Arc<JsonMessage>],
 ) -> Result<usize, Error> {
@@ -37,6 +37,9 @@ pub fn process_batch(
             },
         })
         .collect();
+
+    // Use OSRM to snap the location to the nearest road
+    let new_records = crate::osrm::snap_to_road(new_records).await;
 
     // Perform the batch insert
     diesel::insert_into(bump_records::table)

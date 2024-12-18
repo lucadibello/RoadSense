@@ -1,8 +1,8 @@
-// import config.rs
 mod config;
 mod db;
 mod message;
 mod model;
+mod osrm;
 mod rabbit;
 
 use crate::config::load_env;
@@ -68,6 +68,7 @@ async fn main() {
     // Array to store bunch of messages
     let mut batch = Vec::<Arc<JsonMessage>>::with_capacity(batch_size);
 
+    // FIXME: Just for test, we will add some points to the queue
     loop {
         // Wait for a message or timeout
         let result = timeout(Duration::from_secs(timeout_secs), rx.recv()).await;
@@ -85,7 +86,7 @@ async fn main() {
                 // If the batch is full, process it
                 if batch.len() >= batch_size {
                     info!("Batch is full. Processing...");
-                    let result = bumprecord::process_batch(&mut conn, &batch);
+                    let result = bumprecord::process_batch(&mut conn, &batch).await;
                     match result {
                         Ok(s) => {
                             info!("Batch processed successfully: {} records inserted", s);
@@ -106,7 +107,7 @@ async fn main() {
                 // Timeout occurred
                 if !batch.is_empty() {
                     info!("Timeout reached. Processing partial batch...");
-                    let result = bumprecord::process_batch(&mut conn, &batch);
+                    let result = bumprecord::process_batch(&mut conn, &batch).await;
                     match result {
                         Ok(s) => {
                             info!("Batch processed successfully: {} records inserted", s);

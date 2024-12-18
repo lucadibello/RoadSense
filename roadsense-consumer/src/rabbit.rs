@@ -65,6 +65,35 @@ impl Rabbit {
 
         info!("Declared queue");
 
+        // FIXME: REMOVE THIS BLOCK
+        sender
+            .send(Arc::new(JsonMessage {
+                device_id: "device_id".to_string(),
+                timestamp: 1234567890,
+                lat: 52.517037,
+                lon: 13.388860,
+                bumpiness: 1,
+            }))
+            .await;
+        sender
+            .send(Arc::new(JsonMessage {
+                device_id: "device_id".to_string(),
+                timestamp: 1234567890,
+                lat: 52.529407,
+                lon: 13.397634,
+                bumpiness: 1,
+            }))
+            .await;
+        sender
+            .send(Arc::new(JsonMessage {
+                device_id: "device_id".to_string(),
+                timestamp: 1234567890,
+                lat: 52.523219,
+                lon: 13.428555,
+                bumpiness: 1,
+            }))
+            .await;
+
         // Start consuming messages
         info!("Consuming messages...");
         while let Some(delivery) = consumer.next().await {
