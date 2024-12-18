@@ -1,0 +1,99 @@
+\section{Prototype Embedded Firmware}
+
+In this section, we provide an overview of the core components and implementation details of the prototype embedded firmware developed for the sensor node. The firmware orchestrates sensor data acquisition, road quality analysis, and reliable data transmission to an external system.
+The following subsections summarize the primary files and their responsibilities:
+
+\begin{itemize}
+    \item \textbf{Mainfile (.ino):} Initializes the system, sets up multithreaded operations, and manages the data flow between sensor acquisition and network transmission.
+    \item \textbf{roadqualifier.h:} Contains the logic for measuring, calibrating, and quantifying road segment quality using integrated sensors, along with persistent calibration data handling.
+    \item \textbf{RabbitMQClient.h:} Handles WiFi connectivity and MQTT-based communication, enabling the sending of computed road quality metrics to a RabbitMQ server.
+\end{itemize}
+
+By clearly defining these components, the firmware maintains a modular structure, simplifying development, testing, and future enhancements.
+
+\subsection{Mainfile (roadsense-embedded.ino)}
+
+The main Arduino \texttt{roadsense-embedded.ino} file serves as the central entry point for the embedded firmware running on the sensor node. Its primary tasks involve initializing system components, orchestrating two concurrent threads for road data acquisition and transmission, and managing communication buffers.
+
+\begin{itemize}
+    \item \textbf{Initialization and Setup:}  
+    At startup, the main file initializes serial communication for debugging and user feedback. It then sets up the \texttt{RoadQualifier} instance, which prepares sensor input (e.g., IMU and GPS readings) for analyzing road quality. If initialization fails, the system reports this via serial output.
+
+    \item \textbf{Multithreading using Mbed OS:}  
+    Leveraging Mbed OS RTOS features, the firmware runs two threads concurrently:
+    \begin{enumerate}
+        \item \textit{Road Segmentation Thread}: Periodically calls \texttt{roadQualifier.qualifySegment()} to compute the quality of a road segment. Upon success, it stores the resulting \texttt{SegmentQuality} record into a thread-safe circular buffer.
+        \item \textit{Data Transmission Thread}: Establishes and maintains a WiFi connection, then continuously reads from the circular buffer to transmit data using a \texttt{RabbitMQClient}. If no data is available, it waits until new records arrive.
+    \end{enumerate}
+
+    \item \textbf{Circular Buffer for Data Storage:}  \\
+    A custom circular buffer, protected by a mutex, ensures safe concurrent access from both threads. If the buffer is full, the oldest entry is overwritten, preventing blocking conditions and ensuring efficient memory usage.
+
+    \item \textbf{Data Transmission via RabbitMQ:}  \\
+    Once connected to WiFi, the data transmission thread publishes buffered \texttt{SegmentQuality} records to an external system through the \texttt{rabbitMQClient}. This design decouples data acquisition from network-related issues, allowing both to operate independently.
+
+    \item \textbf{Watchdog and Timing:}  \\
+    Although not fully explored in the provided snippet, the code includes a watchdog timer and uses \texttt{ThisThread::sleep\_for()} to handle timing and maintain system responsiveness.
+
+    \item \textbf{Main Loop:}  \\
+    The \texttt{loop()} function remains empty, as the system relies on RTOS threads for ongoing tasks. All main logic thus resides in separate threads defined in the setup phase.
+\end{itemize}
+
+\subsection{roadqualifier.h}
+
+The \texttt{roadqualifier.h} file encapsulates the logic and data structures required to process road quality measurements from connected sensors, manage calibration and data persistence, and ensure system readiness. This file defines the \texttt{RoadQualifier} class, which serves as the core of the road quality analysis functionality.
+
+\begin{itemize}
+    \item \textbf{Sensor Abstraction and Dummy Modes:}  
+    The code supports both actual hardware operation and dummy sensor modes for testing without physical IMU or GPS devices. Conditional compilation flags (e.g., \texttt{DUMMY\_MPU} and \texttt{DUMMY\_GPS}) select between real and simulated sensor inputs. This approach allows seamless development and debugging even when hardware is unavailable.
+
+    \item \textbf{Road Segment Qualification:}  
+    The \texttt{RoadQualifier} class provides a \texttt{qualifySegment()} method to measure a predefined road segment’s quality. It uses acceleration data (from the MPU6050 or dummy equivalent) and position/speed data (from a GPS module or dummy object) to compute a \texttt{SegmentQuality} metric. If a valid segment is detected, it returns a quantized quality value mapped into a byte range.
+
+    \item \textbf{Calibration Handling and Flash Memory:}  
+    The file includes routines for:
+    \begin{itemize}
+        \item \textit{Calibration}: Acquiring accelerometer data over a specified timeframe to determine minimum and maximum values, ensuring that subsequent measurements are interpreted correctly.
+        \item \textit{Persistent Storage}: Using Mbed’s \texttt{FlashIAPBlockDevice} and related helpers (\texttt{FlashIAPLimits.h}) to store and retrieve calibration parameters (e.g., minimum and maximum acceleration differences) in non-volatile flash memory.
+        \item \textit{Deletion of Calibration Data}: Providing a function \texttt{deleteCalibrationFromFlash()} to erase previously stored calibration information, enabling reset or re-calibration scenarios.
+    \end{itemize}
+
+    \item \textbf{Quantification and Mapping:}  
+    A dedicated \texttt{quantifyToByte()} function maps computed acceleration differences into a 0–255 byte range, allowing easy interpretation and transmission of road quality metrics.
+
+    \item \textbf{Initial Setup and Readiness Checks:}  
+    The \texttt{begin()} method initializes sensors, loads or creates calibration data, and ensures a stable GPS fix before considering the system ready. The \texttt{isReady()} method provides a quick way to confirm that the \texttt{RoadQualifier} is fully operational.
+
+    \item \textbf{GPS and IMU Integration:}  
+    Functions such as \texttt{waitForValidLocation()} and \texttt{waitForValidSpeed()} ensure that the system obtains reliable, fresh data from the GPS before proceeding. The IMU (or dummy MPU) data is read at each iteration, feeding the computation that identifies peak acceleration differences along the measured road segment.
+\end{itemize}
+
+%In summary, \texttt{roadqualifier.h} defines a comprehensive solution for segment-based road quality analysis, integrating calibration, sensor data handling, quantization, and persistent storage management. This modular design allows flexible testing, easy recalibration, and robust operation under real-world conditions.
+
+\subsection{RabbitMQClient.h}
+
+The \texttt{RabbitMQClient.h} file manages the communication between the sensor node and an external RabbitMQ server over MQTT. It encapsulates WiFi connectivity handling, MQTT client operations, and the formatting and publishing of road segment data into a consistent interface.
+
+\begin{itemize}
+    \item \textbf{WiFi Connectivity Management:}  
+    The class attempts to connect to one of several predefined WiFi networks. It continually checks WiFi status and provides a method \texttt{isConnectedWiFi()} to confirm a successful connection. By iterating through a list of credentials, the code increases the likelihood of establishing a network connection in various deployment environments.
+
+    \item \textbf{MQTT Integration for RabbitMQ:}  
+    The \texttt{RabbitMQClient} uses the \texttt{PubSubClient} library to communicate over the MQTT protocol. It sets up the MQTT server (RabbitMQ host, port, user, and password) and ensures a persistent connection. The \texttt{connect()} method and the internal \texttt{ensureConnected()} helper function handle reconnection logic and error reporting.
+
+    \item \textbf{Error Handling:}  
+    In case of connection failures or publishing errors, the class stores the MQTT state code, accessible via \texttt{getErrorCode()}. This mechanism aids in debugging and understanding the cause of communication issues.
+
+    \item \textbf{Publishing Data and Callbacks:}  
+    To send road segment quality data, the class provides:
+    \begin{itemize}
+        \item \textit{\texttt{publishSegmentQuality()}}: Converts a \texttt{SegmentQuality} struct into a JSON-formatted message and publishes it to a designated MQTT topic.
+        \item \textit{\texttt{sendDataCallback()}}: A method suitable for periodic or callback-driven operations, connecting to the RabbitMQ server (if not connected) and publishing freshly acquired segment data.
+    \end{itemize}
+
+    \item \textbf{Integration with the Firmware:}  
+    By abstracting away the details of WiFi and MQTT connections, \texttt{RabbitMQClient} allows other parts of the firmware—such as the road qualifier threads—to focus solely on data acquisition and retrieval. The communication logic remains modular, enabling future changes to the network stack or message format without altering the core road quality logic.
+
+\end{itemize}
+
+%In summary, \texttt{RabbitMQClient.h} provides a streamlined interface for connecting to WiFi and reliably sending computed segment quality metrics to an external RabbitMQ server via MQTT. This modular approach ensures that network and communication complexities are well-separated from the sensor data processing logic.

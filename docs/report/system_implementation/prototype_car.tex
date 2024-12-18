@@ -1,0 +1,41 @@
+\section{Prototype Car}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[angle=90,width=0.7\textwidth]{../../assets/images/roadsense_rc_top.jpg}
+    \caption{RoadSense Prototype RC Top View}
+\end{figure}
+
+\subsubsection{Hardware Components}
+
+\begin{enumerate}
+    \item \textbf{Microcontroller}: \\
+        \textbf{Arduino Portenta H7} with built-in Wi-Fi capability.
+    \item \textbf{IMU Sensor}: \\
+        \textbf{GY-521} with MPU6050 6DOF (3-Axis Gyro and 3-Axis Accelerometer).
+    \item \textbf{GPS Module}: \\
+        \textbf{DFRobot GPS + BDS BeiDou} with output of position and speed.
+    \item \textbf{EMF Shielding}: \\
+        \textbf{DIY} using aluminum foil to shield the GPS module from electromagnetic interference.
+
+\end{enumerate}
+
+\subsubsection{Wiring}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|l|p{8cm}|}
+    \hline
+    \textbf{}         & \textbf{Sensor}       & \textbf{Portenta H7}            & \textbf{Description}                                                    \\ \hline
+    \textbf{GY-521}         & VCC                   & 3.3V                            & Power supply (3.3V)                                                     \\ \cline{2-4}
+                            & GND                   & GND                             & Ground                                                                  \\ \cline{2-4}
+                            & SDA                   & SDA (Pin 11)                    & I2C Data line (SDA)                                                     \\ \cline{2-4}
+                            & SCL                   & SCL (Pin 12)                    & I2C Clock line (SCL)                                                    \\ \hline
+    \textbf{DFRobot GPS}    & VCC                   & 3.3V                            & Power supply (3.3V)                                                     \\ \cline{2-4}
+                            & GND                   & GND                             & Ground                                                                  \\ \cline{2-4}
+                            & TX                    & RX (Pin 13)                     & Serial data transmit line \newline (TX from GPS to RX on Portenta H7)   \\ \cline{2-4}
+                            & RX                    & TX (Pin 14)                     & Serial data receive line \newline (RX from GPS to TX on Portenta H7)    \\ \hline
+    \end{tabular}
+    \caption{Pin Connections for Sensors with Arduino Portenta H7}
+    \label{tab:sensor_connections}
+    \end{table}
