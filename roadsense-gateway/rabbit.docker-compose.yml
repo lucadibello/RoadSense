@@ -1,0 +1,18 @@
+services:
+  # RabbitMQ
+  rabbitmq:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: roadsense-rabbit
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+      RABBITMQ_PLUGINS: rabbitmq_management,rabbitmq_mqtt
+    ports:
+      - "5672:5672" # AMQP TCP EntryPoint
+      - "15672:15672" # HTTP Entrypoint
+      - "1883:1883" # MQTT EntryPoint
+

@@ -8,8 +8,8 @@ services:
     ports:
       - "80:80" # HTTP
       - "443:443" # HTTPS
-      - "5672:5672" # AMQP TCP EntryPoint
       - "5432:5432" # Postgres TCP EntryPoint
+      # - "5672:5672" # AMQP TCP EntryPoint
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
@@ -27,31 +27,39 @@ services:
     networks:
       - traefik_network
 
-  # RabbitMQ
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: roadsense-rabbit
-    env_file:
-      - .env
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    labels:
-      - "traefik.enable=true"
-
-      # HTTP Labels for Management Dashboard
-      - "traefik.http.routers.rabbitmq-ui.rule=Host(`rabbit.${DOMAIN}`)"
-      - "traefik.http.routers.rabbitmq-ui.entrypoints=websecure"
-      - "traefik.http.routers.rabbitmq-ui.tls=true"
-      - "traefik.http.services.rabbitmq-ui.loadbalancer.server.port=15672"
-
-      # TCP Labels for AMQP Service
-      - "traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp"
-      - "traefik.tcp.routers.rabbitmq-amqp.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.rabbitmq-amqp.tls=false"
-      - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
-    networks:
-      - traefik_network
+  # # RabbitMQ
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   container_name: roadsense-rabbit
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+  #     RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+  #     RABBITMQ_PLUGINS: rabbitmq_management,rabbitmq_mqtt
+  #   labels:
+  #     - "traefik.enable=true"
+  #
+  #     # HTTP Labels for Management Dashboard
+  #     - "traefik.http.routers.rabbitmq-ui.rule=Host(`rabbit.${DOMAIN}`)"
+  #     - "traefik.http.routers.rabbitmq-ui.entrypoints=websecure"
+  #     - "traefik.http.routers.rabbitmq-ui.tls=true"
+  #     - "traefik.http.services.rabbitmq-ui.loadbalancer.server.port=15672"
+  #
+  #     # TCP Labels for AMQP Service
+  #     - "traefik.tcp.routers.rabbitmq-amqp.entrypoints=amqp"
+  #     - "traefik.tcp.routers.rabbitmq-amqp.rule=HostSNI(`*`)"
+  #     - "traefik.tcp.routers.rabbitmq-amqp.tls=false"
+  #     - "traefik.tcp.services.rabbitmq-amqp.loadbalancer.server.port=5672"
+  #
+  #     # TCP Labels for MQTT Service
+  #     - "traefik.tcp.routers.rabbitmq-mqtt.entrypoints=mqtt"
+  #     - "traefik.tcp.routers.rabbitmq-mqtt.rule=HostSNI(`*`)"
+  #     - "traefik.tcp.routers.rabbitmq-mqtt.tls=false"
+  #     - "traefik.tcp.services.rabbitmq-mqtt.loadbalancer.server.port=1883"
+  #   networks:
+  #     - traefik_network
+  #
 
   # Database
   db:
