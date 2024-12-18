@@ -23,6 +23,9 @@ entryPoints:
   amqp:
     address: ":5672" # EntryPoint for AMQP TCP Traffic
 
+  mqtt:
+    address: ":1883" # EntryPoint for MQTT TCP Traffic
+
   postgres:
     address: ":5432" # EntryPoint for Postgres TCP Traffic
 
