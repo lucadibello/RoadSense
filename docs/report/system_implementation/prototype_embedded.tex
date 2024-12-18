@@ -45,7 +45,7 @@ The \texttt{roadqualifier.h} file encapsulates the logic and data structures req
 
 \begin{itemize}
     \item \textbf{Sensor Abstraction and Dummy Modes:}  
-    The code supports both actual hardware operation and dummy sensor modes for testing without physical IMU or GPS devices. Conditional compilation flags (e.g., \texttt{DUMMY\_MPU} and \texttt{DUMMY\_GPS}) select between real and simulated sensor inputs. This approach allows seamless development and debugging even when hardware is unavailable.
+    The code supports both actual hardware operation and dummy sensor modes for testing without physical IMU or GPS devices. Conditional compilation flags (e.g., \texttt{DUMMY\_MPU} and \texttt{DUMMY\_GPS}) select between real and simulated sensor inputs. This approach allows for development and debugging of other modules without actual available sensors.
 
     \item \textbf{Road Segment Qualification:}  
     The \texttt{RoadQualifier} class provides a \texttt{qualifySegment()} method to measure a predefined road segment’s quality. It uses acceleration data (from the MPU6050 or dummy equivalent) and position/speed data (from a GPS module or dummy object) to compute a \texttt{SegmentQuality} metric. If a valid segment is detected, it returns a quantized quality value mapped into a byte range.
@@ -59,7 +59,7 @@ The \texttt{roadqualifier.h} file encapsulates the logic and data structures req
     \end{itemize}
 
     \item \textbf{Quantification and Mapping:}  
-    A dedicated \texttt{quantifyToByte()} function maps computed acceleration differences into a 0–255 byte range, allowing easy interpretation and transmission of road quality metrics.
+    A dedicated \texttt{quantifyToByte()} function maps computed acceleration differences into a 0–255 byte range based on the caputred calibration data. This allows for easy interpretation, efficient storage and transmission of road quality metrics.
 
     \item \textbf{Initial Setup and Readiness Checks:}  
     The \texttt{begin()} method initializes sensors, loads or creates calibration data, and ensures a stable GPS fix before considering the system ready. The \texttt{isReady()} method provides a quick way to confirm that the \texttt{RoadQualifier} is fully operational.
