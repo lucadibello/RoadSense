@@ -62,11 +62,12 @@ async fn main() -> std::io::Result<()> {
         error!("ALLOWED_ORIGINS not found in environment variables. Using default value");
         "*".into() // default value
     });
+
     // Define and start HTTP server
     HttpServer::new(move || {
         // define CORS
         let cors = actix_cors::Cors::default()
-            .allowed_origin(origin.as_str())
+            .allow_any_origin()
             .allowed_methods(vec!["GET", "POST"])
             .allowed_headers(vec![http::header::CONTENT_TYPE]);
         //
