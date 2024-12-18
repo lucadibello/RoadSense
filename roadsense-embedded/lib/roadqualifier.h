@@ -1,3 +1,5 @@
+#pragma once
+
 // Include necessary libraries
 #include <Wire.h>             // I2C for MPU6050
 #include <MPU6050.h>          // MPU6050 library by Electronic Cats
@@ -116,6 +118,50 @@ public:
     double lngVal = DUMMY_GPS_LNG;
 };
 
+// --- Dummy date class to mimic TinyGPSDate ---
+class DUMMY_TinyGPSDate {
+public:
+    bool isValid() { return true; }
+    bool isUpdated() { return true; }
+
+    int year() { return currentYear; }
+    int month() { return currentMonth; }
+    int day() { return currentDay; }
+
+    void updateDate(int y, int m, int d) {
+        currentYear = y;
+        currentMonth = m;
+        currentDay = d;
+    }
+
+private:
+    int currentYear = 2024;
+    int currentMonth = 1;
+    int currentDay = 1;
+};
+
+// --- Dummy time class to mimic TinyGPSTime ---
+class DUMMY_TinyGPSTime {
+public:
+    bool isValid() { return true; }
+    bool isUpdated() { return true; }
+
+    int hour() { return currentHour; }
+    int minute() { return currentMinute; }
+    int second() { return currentSecond; }
+
+    void updateTime(int h, int m, int s) {
+        currentHour = h;
+        currentMinute = m;
+        currentSecond = s;
+    }
+
+private:
+    int currentHour = 0;
+    int currentMinute = 0;
+    int currentSecond = 0;
+};
+
 // Dummy TinyGPSPlus class
 class DUMMY_TinyGPSPlus {
 public:
@@ -130,6 +176,8 @@ public:
 
     // Public location object
     DUMMY_TinyGPSLocation location;
+    DUMMY_TinyGPSDate date;
+    DUMMY_TinyGPSTime time;
 
     void nextLoc() {
         // Add approximately <SEGMENT_LENGTH>m to the latitude
@@ -159,9 +207,9 @@ public:
 
 #endif
 
-// ===================================================== //
+// ====================================================== //
 // ================= RoadQualifier class ================ //
-// ===================================================== //
+// ====================================================== //
 
 class RoadQualifier {
   public:
@@ -171,7 +219,9 @@ class RoadQualifier {
     bool isReady(); // Check if class is ready
     bool qualifySegment(); // Analyze a <SEGMENT_LENGTH>m road segment (returns false if segment is invalid)
     SegmentQuality getSegmentQuality();  // Return the quality of the last validly qualified segment (only call after qualifySegment() returns true)
-    bool deleteCalibrationFromFlash(); // Delete calibration data from flash memory (returns false if failed)               
+    bool deleteCalibrationFromFlash(); // Delete calibration data from flash memory (returns false if failed)   
+    
+    time_t getUnixTime(); // Checks for valid GPS date and time and returns Unix time for mqtt message
 
   private:
     // ----- Sensor objects ----- //
@@ -345,6 +395,7 @@ bool RoadQualifier::qualifySegment() {
 
   mpu.getAcceleration(&dummyAcc, &dummyAcc, &lastZAcceleration);
   
+  //unsigned long segmentBeginTime = millis();  // For fallback because GPS speed is faulty
   unsigned long iterationEnd = millis();
   unsigned long iter = 0;
 
@@ -383,7 +434,10 @@ bool RoadQualifier::qualifySegment() {
     iterationEnd = millis();
     segmentDistance += currentSpeedKmph * (iterationEnd - iterationStart) / 3600.0f; // [km/h] * [ms] / [3600 s/h] = [m]
 
+    //Actual model:
     if (segmentDistance >= segmentTotalDistance) {
+    // Fallback because of faulty gps speed 
+    //if (millis() - segmentBeginTime > 1000) {
       segmentComplete = true;
     }
 
@@ -392,7 +446,9 @@ bool RoadQualifier::qualifySegment() {
   }
 
   if (!segmentValid) {
-    Serial.println("Segment invalid: Unable to get initial GPS data within the first 10% or conditions not met.");
+    #ifdef DEBUG
+      Serial.println("Segment invalid: Unable to get initial GPS data within the first 10% or conditions not met.");
+    #endif
     return false;
   }
 
@@ -755,4 +811,44 @@ bool RoadQualifier::deleteCalibrationFromFlash() {
   Serial.println("Calibration data erased from flash successfully.");
 
   return true;
+}
+
+// ================ Unix Time Function =================== //
+
+// helper function to convert a given date/time to a Unix timestamp.
+// The algorithm is adapted from standard formulas for converting a date/time to Unix time.
+time_t dateTimeToUnix(int year, int month, int day, int hour, int minute, int second) {
+    // Unix time starts on Jan 1 1970 (UTC)
+    // Calculate days from 1970 until the given year
+    int a = (14 - month) / 12;
+    int y = year + 4800 - a;
+    int m = month + 12*a - 3;
+    
+    // Julian day number for this date
+    // Note: This formula is valid for year >= 1 (no leap second)
+    uint32_t julian_day = day + ((153*m + 2)/5) + 365*y + y/4 - y/100 + y/400 - 32045;
+    
+    // Julian day of Unix epoch (1970-01-01) is 2440588
+    uint32_t days_since_epoch = julian_day - 2440588;
+    
+    // Convert to seconds
+    time_t unix_time = (time_t)days_since_epoch*86400 + hour*3600 + minute*60 + second;
+    return unix_time;
+}
+
+// Checks if we have valid GPS date and time and returns Unix time
+time_t RoadQualifier::getUnixTime() {
+    if (!gps.date.isValid() || !gps.time.isValid()) {
+        // If GPS time/date is not valid, return 0 or some error code
+        return 0;
+    }
+
+    int year   = (int)gps.date.year();   // e.g., 2024
+    int month  = (int)gps.date.month();  // 1-12
+    int day    = (int)gps.date.day();    // 1-31
+    int hour   = (int)gps.time.hour();   // 0-23
+    int minute = (int)gps.time.minute(); // 0-59
+    int second = (int)gps.time.second(); // 0-59
+
+    return dateTimeToUnix(year, month, day, hour, minute, second);
 }

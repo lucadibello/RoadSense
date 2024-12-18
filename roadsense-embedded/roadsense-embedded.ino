@@ -1,8 +1,8 @@
 #include <Arduino.h>       // Arduino classes, including Print and Stream
 #include <WiFi.h>          // Arduino WiFi
-#include "SegmentQuality.h"
-#include "RabbitMQClient.h" // includes PubSubClient.h which uses Arduino::Stream
-#include "roadqualifier.h"  // roadqualifier code
+#include "./lib/SegmentQuality.h"
+#include "./lib/RabbitMQClient.h" // includes PubSubClient.h which uses Arduino::Stream
+#include "./lib/roadqualifier.h"  // roadqualifier code
 
 #include <mbed.h>
 #include <rtos.h>
@@ -12,10 +12,12 @@
 // Avoid any macro collisions
 #undef Stream
 
+#define DEBUG // Enable debug output
+
 using namespace rtos;
 
 #define TIME_T2 1.0
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 1000
 #define WATCHDOG_TIMEOUT 3.0  // Watchdog timeout in seconds
 #define SERIAL_BAUD 115200    // Serial baud rate
 
@@ -86,17 +88,21 @@ void task1_function() {
             // Add data to the buffer (overwriting oldest data if full)
             circular_buffer.put(segmentQuality);
 
-            Serial.print("Added to buffer segment quality: ");
-            Serial.print(segmentQuality.latitude);
-            Serial.print(", ");
-            Serial.print(segmentQuality.longitude);
-            Serial.print(", ");
-            Serial.println(segmentQuality.quality);
+            #ifdef DEBUG
+                Serial.print("Added to buffer segment quality: ");
+                Serial.print(segmentQuality.latitude);
+                Serial.print(", ");
+                Serial.print(segmentQuality.longitude);
+                Serial.print(", ");
+                Serial.println(segmentQuality.quality);
+            #endif
         } else {
-            Serial.println("Failed to qualify segment.");
+            #ifdef DEBUG
+                Serial.println("Failed to qualify segment.");
+            #endif
         }
 
-        ThisThread::sleep_for(1000); // 100 ms
+        ThisThread::sleep_for(100); // 100 ms
     }
 }
 
@@ -111,16 +117,22 @@ void task2_function() {
         while (rabbitMQClient.isConnectedWiFi()) {
             if (circular_buffer.get(segmentQuality)) {
 
-                rabbitMQClient.sendDataCallback(segmentQuality);
+                rabbitMQClient.sendDataCallback(segmentQuality, roadQualifier.getUnixTime());
                 
-                Serial.print("Sent segment quality: ");
-                Serial.print(segmentQuality.latitude);
-                Serial.print(", ");
-                Serial.print(segmentQuality.longitude);
-                Serial.print(", ");
-                Serial.println(segmentQuality.quality);
+                #ifdef DEBUG
+                    Serial.print("Sent segment quality: ");
+                    Serial.print(segmentQuality.latitude);
+                    Serial.print(", ");
+                    Serial.print(segmentQuality.longitude);
+                    Serial.print(", ");
+                    Serial.print(segmentQuality.quality);
+                    Serial.print(", ");
+                    Serial.println(roadQualifier.getUnixTime());
+                #endif
             } else {
-                Serial.println("Buffer is empty. Waiting for data.");
+                #ifdef DEBUG
+                    Serial.println("Buffer is empty. Waiting for data.");
+                #endif
             }
 
         } 
@@ -130,15 +142,21 @@ void task2_function() {
 
 void setup() {
     Serial.begin(SERIAL_BAUD);
-    while (!Serial);
+    // while (!Serial);
 
     // Initialize the road qualifier
-    if (!roadQualifier.begin()) {
-        Serial.print("Failed to initialize RoadQualifier.\n");
-        return;
+    while(true){
+      if (roadQualifier.begin()) {
+        Serial.println("Road Quality Qualifier is ready.");
+        break;
+      } else {
+        Serial.println("Failed to initialize Road Quality Qualifier. Retrying!!!");
+        delay(2000);
+        // Handle initialization failure (e.g., halt or retry)
+      }
     }
 
-    // t1.start(task1_function);
+    t1.start(task1_function);
     t2.start(task2_function);    
 }
 
