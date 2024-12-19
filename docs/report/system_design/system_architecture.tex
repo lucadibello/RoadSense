@@ -30,22 +30,14 @@ The pipeline consists of the following components:
 	      PostGIS was used to store and query collected samples
 \end{enumerate}
 
-\subsection{Client-Server Architecture}
+\subsection{Client-Server interaction}
 
-This section describes the client-server architecture of the system, focusing on the interaction between the web application and the server-side components. The following diagram illustrates how the client (web browser) interacts with the server to load and visualize collected data:
+The \textbf{RoadSense} system employs a client-server architecture designed to efficiently deliver real-time road condition data. The client is a web-based application that visualizes road condition samples on an interactive map. These samples are fetched from a custom API microservice, which only returns data points within the map's current bounding box, leveraging \textbf{PostGIS} for spatial queries to optimize performance and minimize data transfer. This ensures scalability and efficient handling of large datasets, as the system can support millions of samples without overwhelming either the client or the server. The following diagram illustrates the client-server interaction:
 
-\begin{figure}[h!]
-	\centering
-	\includegraphics[width=0.5\textwidth]{../../assets/diagrams/web_app_architecture/web_app_architecture.png}
-	\caption{Client-Server Architecture}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{../../assets/diagrams/client_server_architecture/client_server_arch.png}
+  \caption{Client-Server Interaction}
 \end{figure}
 
-The pipeline consists of the following components:
-
-\begin{enumerate}
-	\item \textbf{Clients}: The application users (agents or web browsers) interact with the web application to view road conditions, manage alerts, and access other features.
-	\item \textbf{Authentication}: To manage user access and permissions, users need to authenticate themselves. For this purpose, we will use the same instance of \href{https://www.keycloak.org/}{Keycloak} that is used for IoT device authentication. To have a greater division between IoT devices and users, we will employ different realms in Keycloak (refer to the \href{https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms}{Keycloak Documentation}).
-	\item \textbf{Geographical distribution}: API requests are routed to the regional API gateways using DNS-based load balancing. We will use the same \href{https://www.isc.org/bind/}{BIND9} + \href{https://www.maxmind.com/en/geoip2-databases}{GeoIP} + \href{https://traefik.io/}{Traefik} setup as described in the IoT data pipeline section.
-	\item \textbf{API Workers}: Each region has a set of API worker microservices that will handle incoming API requests, query the database, and return the requested data to the client. These microservices will be deployed using containerization technology like Docker and managed by \href{https://kubernetes.io/}{Kubernetes} in a future production environment. Furthermore, they will be developed using \href{https://golang.org/}{Go} to enhance the application performance.
-	\item \textbf{Database cluster}: API workers connect to the database cluster containing the aggregated IoT data, allowing them to retrieve the necessary information for the client requests.
-\end{enumerate}
+\noindent The backend is implemented as a custom API server built with \textbf{Rust} using the \textbf{Actix} web framework and \href{https://diesel.rs/}{Diesel} for database interaction. It provides a read-only interface, returning road condition samples in \texttt{JSON} format based on client requests. Data insertion is handled by separate consumers processing messages from \textbf{RabbitMQ}. The architecture enables efficient data processing, retrieval, and real-time visualization while maintaining scalability and performance.
