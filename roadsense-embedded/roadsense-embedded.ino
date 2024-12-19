@@ -24,7 +24,6 @@ using namespace rtos;
 
 rtos::Thread t1;
 rtos::Thread t2;
-mbed::Ticker task2;
 rtos::Mutex buffer_mutex;
 
 RoadQualifier roadQualifier;
@@ -152,7 +151,6 @@ void setup() {
       } else {
         Serial.println("Failed to initialize Road Quality Qualifier. Retrying!!!");
         delay(2000);
-        // Handle initialization failure (e.g., halt or retry)
       }
     }
 
