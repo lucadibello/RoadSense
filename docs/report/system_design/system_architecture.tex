@@ -24,12 +24,15 @@ The pipeline consists of the following components:
 
 	\item \textbf{Message queues}: Each gateway node processes incoming data and forwards it to a regional queuing system to allow for parallel processing. After evaluating multiple options, we decided to use \href{https://www.rabbitmq.com/}{RabbitMQ} as the message queue system. To ensure high availability, we will deploy RabbitMQ in a cluster configuration (refer to the \href{https://www.rabbitmq.com/clustering.html}{RabbitMQ Clustering Guide}). For the prototype we avoided the creation of a RabbitMQ cluster, and was used a single instance of RabbitMQ. This feature is still of interest for the scalability of the system.
 
-	\item \textbf{Data preprocessing}: Each region has a set of preprocessing microservices that consume incoming data from the regional message queuing system, perform data validation, and run initial data processing tasks. These microservices are deployed using containerization technology like Docker and in a future production environment, managed by \href{https://kubernetes.io/}{Kubernetes}.
-	      During the initial specification of the project was decided to use \href{https://golang.org/}{Go} as the primary language for these microservices. However, in the prototype was used \href{https://rust-lang.org/}{Rust} as the primary language for the microservices. This choice was made to explore the performance and safety features of Rust. The microservices were designed to be lightweight, efficient and fail-safe.
+	\item \textbf{Data Consumers and Preprocessing}: Each region is served by a set of consumer microservices that retrieve incoming data from the RabbitMQ clusters, perform data validation, and execute map matching to process and align the data with geographical coordinates.
+
+	      During the initial project specifications, \href{https://golang.org/}{Go} was selected as the primary language for these microservices. However, the prototype implementation utilized \href{https://rust-lang.org/}{Rust} instead. This decision was driven by the opportunity to explore Rust's performance and safety features. The microservices were designed to be lightweight, efficient, and resilient against failures.
 
 	\item \textbf{Data storage}: Processed data is stored in a scalable database system that can handle high volumes of data. Since we are dealing with both date-time and geospatial data, we chose to use \href{https://www.timescale.com/}{TimescaleDB} as the database system with the \href{https://postgis.net/}{PostGIS} extension to support geospatial queries.
 	      PostGIS was used to store and query collected samples
 \end{enumerate}
+
+\noindent \textit{Note:} Although not implemented in the current prototype, most of the services/microservices described above could be containerized (if not already) using technologies like Docker and managed in a production environment using \href{https://kubernetes.io/}{Kubernetes} for scalability and orchestration.
 
 \subsection{Client-Server interaction}
 
