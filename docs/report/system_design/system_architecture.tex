@@ -35,6 +35,7 @@ The pipeline consists of the following components:
 \noindent \textit{Note:} Although not implemented in the current prototype, most of the services/microservices described above could be containerized (if not already) using technologies like Docker and managed in a production environment using \href{https://kubernetes.io/}{Kubernetes} for scalability and orchestration.
 
 \subsection{Client-Server interaction}
+\label{subsec:client_server_interaction}
 
 The \textbf{RoadSense} system employs a client-server architecture designed to efficiently deliver real-time road condition data. The client is a web-based application that visualizes road condition samples on an interactive map. These samples are fetched from a custom API microservice, which only returns data points within the map's current bounding box, leveraging \textbf{PostGIS} for spatial queries to optimize performance and minimize data transfer. This ensures scalability and efficient handling of large datasets, as the system can support millions of samples without overwhelming either the client or the server. The following diagram illustrates the client-server interaction:
 
