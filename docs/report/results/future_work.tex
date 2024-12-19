@@ -1,7 +1,16 @@
 \section{Future Work}
 
-\subsubsection{Edge Node}
+\subsection{Edge Node}
 
-\subsubsection{Network}
+\subsection{Data Processing Pipeline}
 
-\subsubsection{Frontend}
+Enhancements to the data processing pipeline will aim to improve scalability, reliability, and data quality. In future iterations, deploying the pipeline in a clustered environment using \href{https://kubernetes.io/}{Kubernetes} will enable dynamic scaling based on data volume. This will ensure consistent performance even as the number of edge nodes and incoming data streams grow.
+
+Integrating an advanced preprocessing layer could improve the accuracy of map matching and anomaly detection. Currently, the system relies on the OSMR service for map matching, which may not always yield optimal results due to limitations in handling complex or incomplete data. Using a custom map-matching algorithm with machine learning models could enhance the system's ability to align sensor data with road networks accurately.
+
+\subsection{Web Application and API Microservice}
+
+Future updates to the web application will include user authentication and role-based access control, enabling different stakeholders to securely access relevant data. Advanced filtering options, such as time-based queries and historical data visualization, will provide deeper insights into road conditions over time. Additionally, at the moment each sample is characterized by the device ID of the IoT device that collected it but this value is not used in the frontend. In future iterations of the project wouldc be interesting to be able to show the contribution of each device to the dataset directly in the page.
+
+On the other hand, the API microservice would need to be extended in order to support write operations for enabling user-driven annotations or reports on specific road conditions.
+
