@@ -16,21 +16,23 @@ The **RoadSense API** is a web service that provides access to road condition da
 
 The API service uses a `.env` file to configure its environment. Below is an example of the required variables:
 
-> **Database Configuration**  
-> `DATABASE_URL=postgres://postgres:postgres@db.roadsense.dev:5432/roadsense`
+```bash
+# Database Configuration
+DATABASE_URL=postgres://postgres:postgres@db.roadsense.dev:5432/roadsense
 
-> **Webserver Configuration**  
-> `HOST=localhost`  
-> `PORT=3000`
+# Webserver Configuration
+HOST=localhost
+PORT=3000
 
-> **CORS Options**  
-> `ALLOWED_ORIGINS=http://localhost:5173`
+# CORS Options
+ALLOWED_ORIGINS=http://localhost:5173
 
-> **Logger Configuration**  
-> `RUST_LOG=info`  
-> `RUST_BACKTRACE=0`
+# Logger Configuration
+RUST_LOG=info
+RUST_BACKTRACE=0
+```
 
-Make sure the `.env` file is properly configured before running the API.
+Make sure the `.env` file is properly configured before running the API. The provided `.env.example` file can be used as a template.
 
 ---
 
