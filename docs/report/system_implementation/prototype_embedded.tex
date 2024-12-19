@@ -4,7 +4,7 @@ In this section, we provide an overview of the core components and implementatio
 The following subsections summarize the primary files and their responsibilities:
 
 \begin{itemize}
-    \item \textbf{Mainfile (.ino):} Initializes the system, sets up multithreaded operations, and manages the data flow between sensor acquisition and network transmission.
+    \item \textbf{Mainfile (roadsense-embedded.ino):} Initializes the system, sets up multithreaded operations, and manages the data flow between sensor acquisition and network transmission.
     \item \textbf{roadqualifier.h:} Contains the logic for measuring, calibrating, and quantifying road segment quality using integrated sensors, along with persistent calibration data handling.
     \item \textbf{RabbitMQClient.h:} Handles WiFi connectivity and MQTT-based communication, enabling the sending of computed road quality metrics to a RabbitMQ server.
 \end{itemize}
@@ -17,7 +17,7 @@ The main Arduino \texttt{roadsense-embedded.ino} file serves as the central entr
 
 \begin{itemize}
     \item \textbf{Initialization and Setup:}  
-    At startup, the main file initializes serial communication for debugging and user feedback. It then sets up the \texttt{RoadQualifier} instance, which prepares sensor input (e.g., IMU and GPS readings) for analyzing road quality. If initialization fails, the system reports this via serial output.
+    At startup, the main file initializes serial communication for debugging. It then sets up the \texttt{RoadQualifier} instance, which prepares sensor input (e.g., IMU and GPS readings) for analyzing road quality. If initialization fails, the system reports this via serial output.
 
     \item \textbf{Multithreading using Mbed OS:}  
     Leveraging Mbed OS RTOS features, the firmware runs two threads concurrently:
