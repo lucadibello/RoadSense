@@ -21,8 +21,9 @@ const getMarkerColor = (bumpiness_factor: number) => {
   if (bumpiness_factor <= BumpSeverity.Minor) return "#ADFF2F"; // Yellow-Green
   if (bumpiness_factor <= BumpSeverity.Moderate) return "#FFFF00"; // Yellow
   if (bumpiness_factor <= BumpSeverity.Major) return "#FFA500"; // Orange
-  if (bumpiness_factor <= BumpSeverity.Severe) return "#FF0000"; // Red - Severe
-  return "#800080"; // Purple - Extreme (not defined as it should never happen...)
+  return "#FF0000"; // Red - Severe
+  // if (bumpiness_factor <= BumpSeverity.Severe)
+  // return "#800080"; // Purple - Extreme (not defined as it should never happen...)
 };
 
 // Function to create a custom icon for markers
@@ -77,8 +78,7 @@ function HeatMap({ bumps }: HeatMapProps) {
     const heatMapData = bumps.map((bump) => [
       bump.location.y,
       bump.location.x,
-      ((bump.bumpiness_factor - BumpSeverity.Smooth) / BumpSeverity.Severe) *
-        100,
+      (bump.bumpiness_factor - BumpSeverity.Smooth) / BumpSeverity.Severe / 3,
     ]);
 
     const heatLayer = L.heatLayer(heatMapData).addTo(map);
@@ -105,7 +105,7 @@ export default function Map({ filters = [], showHeatmap = false }: MapProps) {
       <MapContainer
         style={{ height: "100%" }}
         center={position}
-        zoom={13}
+        zoom={30}
         scrollWheelZoom={true}
       >
         <TileLayer
