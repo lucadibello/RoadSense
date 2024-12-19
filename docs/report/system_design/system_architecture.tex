@@ -35,9 +35,9 @@ The pipeline consists of the following components:
 The \textbf{RoadSense} system employs a client-server architecture designed to efficiently deliver real-time road condition data. The client is a web-based application that visualizes road condition samples on an interactive map. These samples are fetched from a custom API microservice, which only returns data points within the map's current bounding box, leveraging \textbf{PostGIS} for spatial queries to optimize performance and minimize data transfer. This ensures scalability and efficient handling of large datasets, as the system can support millions of samples without overwhelming either the client or the server. The following diagram illustrates the client-server interaction:
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=\textwidth]{../../assets/diagrams/client_server_architecture/client_server_arch.png}
-  \caption{Client-Server Interaction}
+	\centering
+	\includegraphics[width=\textwidth]{../../assets/diagrams/client_server_architecture/client_server_arch.png}
+	\caption{Client-Server Interaction}
 \end{figure}
 
 \noindent The backend is implemented as a custom API server built with \textbf{Rust} using the \textbf{Actix} web framework and \href{https://diesel.rs/}{Diesel} for database interaction. It provides a read-only interface, returning road condition samples in \texttt{JSON} format based on client requests. Data insertion is handled by separate consumers processing messages from \textbf{RabbitMQ}. The architecture enables efficient data processing, retrieval, and real-time visualization while maintaining scalability and performance.
