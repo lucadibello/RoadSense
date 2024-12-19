@@ -3,6 +3,10 @@
 The current implementation of the \textbf{RoadSense} system, while functional, presents several limitations and areas for improvement:
 
 \begin{itemize}
+    \item \textbf{Sensor Node:} The sensor node prototype lacks a robust enclosure and mounting mechanism, which can lead to sensor misalignment and inaccurate data collection. Additionally, the GPS module's speed data is unreliable, requiring a fallback solution to approximate road segments.
+    \item \textbf{Road Quality Model:} The current road quality model is simplistic and relies solely on z-axis acceleration data. Future iterations should incorporate additional sensor data and a more sophisticated model to improve accuracy.
+    \item \textbf{Data Transmission:} The data transmission mechanism is not optimized for power efficiency, which can lead to increased energy consumption and reduced battery life. Implementing a more efficient communication protocol and optimizing data transfer rates can address this issue.
+    \item \textbf{Prototype Testing:} Testing with a RC car prototype enabled a quick proof of concept but did not fully represent real-world driving conditions. Future testing with a full-scale vehicle is necessary to validate the model's and system's performance under realistic scenarios.
     \item \textbf{Map Matching:} The map-matching functionality relies on the OSMR service, which does not always provide optimal results. This can lead to inaccuracies in aligning road condition data with geographical locations.
     \item \textbf{Frontend Application:} The frontend application is minimalistic and lacks advanced features. Enhancements to the user interface and the addition of anticipated features, such as an automated management system for road condition data, are necessary to improve usability.
     \item \textbf{Unmet Objectives:} Certain objectives outlined during the planning phase, such as the geographical distribution of the system, were not fully achieved in the prototype.

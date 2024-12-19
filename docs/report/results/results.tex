@@ -1,3 +1,9 @@
 \section{Results}
 
-To fill!
+The \textbf{RoadSense} system was successfully implemented and tested in a core configuration, demonstrating the feasibility of collecting and analyzing road quality data using IoT devices. The system consists of three main components: the sensor node, the data processing pipeline, and the web application. Each component plays a crucial role in the system's operation and contributes to the overall goal of improving road quality monitoring.
+
+The sensor node prototype was developed using an Arduino-based microcontroller, an IMU sensor, and a GPS module. The node collects acceleration and location data, processes it to compute road quality metrics, and transmits the results to the central system. The sensor node firmware was designed to operate in a multithreaded environment, with separate threads for data acquisition and transmission. The firmware includes mechanisms for handling sensor data, road quality analysis, and network communication. The sensor node successfully transmitted road quality data to the central system, demonstrating its ability to collect and process data in real-time.
+
+The data processing pipeline was implemented using a RabbitMQ message broker, a MongoDB database, and a Node.js server. The pipeline receives road quality data from sensor nodes, stores it in a database, and processes it to generate heatmaps and anomaly alerts. The pipeline was designed to be scalable and fault-tolerant, with support for dynamic scaling and error handling. The pipeline successfully processed road quality data from a sensor node, generating a heatmap and alerts based on the collected data.
+
+The web application provides a user-friendly interface for visualizing road conditions, exploring heatmaps, and managing alerts. The application allows users to view road quality data in real-time and filter data for specific interests. The application was designed to be responsive and interactive, with support for multiple user roles and access levels. The web application successfully displayed road quality data from the central system, enabling users to monitor road conditions and take appropriate actions.

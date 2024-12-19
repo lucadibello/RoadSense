@@ -2,6 +2,10 @@
 
 \subsection{Edge Node}
 
+Future iterations of the edge node will focus on improving the robustness and reliability of the sensor data collection process. This includes developing a more durable enclosure and mounting mechanism to ensure accurate sensor alignment and data collection. Additionally, integrating a more reliable GPS module will enhance the system's ability to capture precise road conditions.
+Testing the system with a full-scale vehicle under real-world driving conditions will provide valuable insights into the system's performance and help validate the road quality model. This testing will also help identify potential issues and areas for improvement, such as optimizing the sensor placement and data collection process.
+Improving the calibration process and incorporating additional sensor data will enhance the accuracy of the road quality model. Future iterations should explore more sophisticated models that consider multiple physical quantities, such as acceleration in the x and y axes and rotational acceleration, to minimize errors induced by driving scenarios. Integrating a simulation-based approach, such as a Mass-Spring-Damper model, will enable the system to account for driving-induced accelerations and road conditions more effectively.
+While also a data driven ML approach could be used to improve the model. This would require a large dataset of road quality measurements and corresponding sensor data to train the model.
 \subsection{Data Processing Pipeline}
 
 Enhancements to the data processing pipeline will aim to improve scalability, reliability, and data quality. In future iterations, deploying the pipeline in a clustered environment using \href{https://kubernetes.io/}{Kubernetes} will enable dynamic scaling based on data volume. This will ensure consistent performance even as the number of edge nodes and incoming data streams grow.
