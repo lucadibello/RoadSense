@@ -10,17 +10,20 @@
 
 \begin{enumerate}
     \item \textbf{Microcontroller}: \\
-        \textbf{Arduino Portenta H7} with built-in Wi-Fi capability.
+        \textbf{Arduino Portenta H7} with built-in Wi-Fi capability and RTOS support. \\
+        Enables usage of threads for sensor data collection and transmission.
     \item \textbf{IMU Sensor}: \\
-        \textbf{GY-521} with MPU6050 6DOF (3-Axis Gyro and 3-Axis Accelerometer).
+        \textbf{GY-521} with MPU6050 6DOF (3-Axis Gyro and 3-Axis Accelerometer). \\
+        While currently only the z-axis acceleration is used, the sensor provides additional data which can be used for future work to improve the road state qualification model.
     \item \textbf{GPS Module}: \\
-        \textbf{DFRobot GPS + BDS BeiDou} with output of position and speed.
+        \textbf{DFRobot GPS + BDS BeiDou} with output of position and speed. \\
+        We were able to fix connectivity by integrating EMF shielding. As the transmitted speed data was faulty, we had to make use of a fallback solution by approximating each segment through a fixed time of 3 seconds.
     \item \textbf{EMF Shielding}: \\
         \textbf{DIY} using aluminum foil to shield the GPS module from electromagnetic interference.
 
 \end{enumerate}
 
-\subsubsection{Wiring}
+Detailed information on the pin connections for the sensors with the Arduino Portenta H7 can be found in Table \ref{tab:sensor_connections}.
 
 \begin{table}[h!]
     \centering
