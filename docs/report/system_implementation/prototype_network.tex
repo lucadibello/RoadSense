@@ -14,4 +14,14 @@ While the current implementation lacks certain advanced features, it retains the
 	\label{fig:prototype_pipeline}
 \end{figure}
 
+\noindent The communication between the IoT device and the RabbitMQ service is done using the MQTT protocol, while the consumer service uses AMQP to retrieve messages from the queue. This was done as MQTT is a lightweight protocol designed for IoT devices, making it suitable for transmitting sensor data. AMQP, on the other hand, is a robust protocol that provides additional features such as message acknowledgments and routing. The following diagram illustrated the flow of data through the prototype pipeline:
+
+\begin{figure}[H]
+	\begin{center}
+		\includegraphics[width=0.95\textwidth]{../../assets/diagrams/prototype_pipeline/prototype_pipeline_annotated.png}
+	\end{center}
+	\caption{Prototype Data Processing Pipeline with Annotations}
+	\label{fig:annotated_prototype_pipeline}
+\end{figure}
+
 \noindent This simplified implementation allows for faster prototyping and development while maintaining a clear path for future enhancements to address scalability and security concerns.
