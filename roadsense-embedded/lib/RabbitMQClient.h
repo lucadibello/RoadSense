@@ -127,9 +127,6 @@ public:
         } else {
             Serial.println("Failed to connect to RabbitMQ");
         }
-
-        // Simulate periodic operation (e.g., send data every 2 seconds)
-        delay(2000);
     }
 
 private:

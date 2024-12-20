@@ -133,15 +133,17 @@ void task2_function() {
                     Serial.println("Buffer is empty. Waiting for data.");
                 #endif
             }
-
         } 
-    }
-    
+        T
+    }ThisThread::sleep_for(1000); // 1 second
 }
 
 void setup() {
     Serial.begin(SERIAL_BAUD);
-    // while (!Serial);
+    #ifdef DEBUG
+        // Wait for serial port to connect
+        while (!Serial);
+    #endif
 
     // Initialize the road qualifier
     while(true){
