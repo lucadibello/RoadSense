@@ -41,10 +41,9 @@ const createCustomIcon = (color: string) =>
 
 interface FetchBumpsProps {
   setBumps: (bumps: RoadBump[]) => void;
-  filters: BumpFilter[];
 }
 
-function FetchBumps({ setBumps, filters }: FetchBumpsProps) {
+function FetchBumps({ setBumps }: FetchBumpsProps) {
   useMapEvent("moveend", async (e) => {
     const bounds = e.target.getBounds();
 
@@ -60,7 +59,8 @@ function FetchBumps({ setBumps, filters }: FetchBumpsProps) {
     // set the bumps
     if (bumps) {
       // Apply filters to the bumps if needed, otherwise set the bumps as is
-      setBumps(filters ? applyFilters(bumps, filters) : bumps);
+      // setBumps(filter ? applyFilters(bumps, [filter]) : bumps);
+      setBumps(bumps);
     }
   });
 
@@ -92,13 +92,21 @@ function HeatMap({ bumps }: HeatMapProps) {
 }
 
 interface MapProps {
-  filters?: BumpFilter[];
+  filter?: BumpFilter;
   showHeatmap?: boolean; // New prop to toggle heatmap display
 }
 
-export default function Map({ filters = [], showHeatmap = false }: MapProps) {
+export default function Map({ filter, showHeatmap = false }: MapProps) {
   const position: LatLngTuple = [46.0109711, 8.9606471];
   const [bumps, setBumps] = useState<RoadBump[]>([]);
+  const [filteredBumps, setFilteredBumps] = useState<RoadBump[]>(bumps);
+
+  useEffect(() => {
+    // If filter is available, apply it!
+    if (!!bumps && !!filter) {
+      setFilteredBumps(applyFilters(bumps, [filter]));
+    }
+  }, [bumps, filter]);
 
   return (
     <div className="w-full h-full">
@@ -112,13 +120,13 @@ export default function Map({ filters = [], showHeatmap = false }: MapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <FetchBumps setBumps={setBumps} filters={filters} />
+        <FetchBumps setBumps={setBumps} />
 
         {/* Conditional rendering of HeatMap or Markers */}
         {showHeatmap ? (
-          <HeatMap bumps={bumps} />
+          <HeatMap bumps={filter ? filteredBumps : bumps} />
         ) : (
-          bumps.map((bump, idx) => {
+          (filter ? filteredBumps : bumps).map((bump, idx) => {
             const color = getMarkerColor(bump.bumpiness_factor);
             return (
               <Marker

@@ -4,6 +4,7 @@ import Map from "../components/ui/map.client";
 import { useState } from "react";
 import { BumpFilter, severityFilters } from "~/util/bumpfilter";
 import { BumpSeverity } from "~/types/bumps";
+import { RoadBump } from "~/types/services";
 
 export const meta: MetaFunction = () => {
   return [
@@ -63,7 +64,7 @@ export default function Index() {
   // Prepare filters as a combined function
   const combinedFilters: BumpFilter | null =
     selectedFilters.length > 0
-      ? (bumps) =>
+      ? (bumps: RoadBump[]): RoadBump[] =>
           selectedFilters
             .map((f) => f.filter(bumps)) // Apply all selected filters
             .flat() // Flatten the results
@@ -83,7 +84,7 @@ export default function Index() {
           <ClientOnly fallback={<div>Loading map...</div>}>
             {() => (
               <Map
-                filters={combinedFilters ? [combinedFilters] : []}
+                filter={combinedFilters ? combinedFilters : undefined}
                 showHeatmap={showHeatmap}
               />
             )}
