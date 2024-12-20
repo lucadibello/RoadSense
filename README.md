@@ -59,7 +59,7 @@ The **RoadSense** system consists of the following components:
 ## Sensor Nodes
 
 <center>
-  <img src="../../assets/diagrams/edge_node_rtuml/edge_node_rtuml.png">
+  <img src="./assets/diagrams/edge_node_rtuml/edge_node_rtuml.png">
   <figcaption>RT-UML of a Sensor Node</figcaption>
 </center>
 
@@ -149,14 +149,14 @@ The **RoadSense** system consists of the following components:
       For example, the following snippet represents a valid data
       sample in JSON format:
 
-      ```{breaklines="true" basicstyle="\ttfamily"}
+      ```json
       {
-                     "lat": 46.19313,
-                     "lon": 6.80421,
-                     "timestamp": 1734478933,
-                     "bumpiness": 50,
-                     "device_id": "USI-Car-1""
-                     }
+        "lat": 46.19313,
+        "lon": 6.80421,
+        "timestamp": 1734478933,
+        "bumpiness": 50,
+        "device_id": "USI-Car-1""
+      }
       ```
 
    2. **Local Preprocessing**: The node will preprocess and store
@@ -427,27 +427,27 @@ managing communication buffers.
      connection failures and re-establish the connection when
      available.
 
-- **Circular Buffer for Data Storage:**\
+- **Circular Buffer for Data Storage:**
   A custom circular buffer, protected by a mutex, ensures safe
   concurrent access from both threads. If the buffer is full, the
   oldest entry is overwritten, preventing blocking conditions and
   ensuring efficient memory usage.
 
-- **Data Transmission via RabbitMQ:**\
+- **Data Transmission via RabbitMQ:**
   Once connected to WiFi, the data transmission thread publishes
   buffered `SegmentQuality` records to an external system through the
   `rabbitMQClient`. This design decouples data acquisition from
   network-related issues, allowing both to operate independently.
 
-- **Watchdog and Timing:**\
+- **Watchdog and Timing:**
   Although not currently used, the code includes a watchdog timer as
-  we planned to use it incase errors related to one of the threads.
+  we planned to use it increase errors related to one of the threads.
   Such safety mechanisms will be implemented in future iterations. The
   system also includes a timing mechanism to ensure that the road
   segment qualification and data transmission threads operate at the
   desired intervals.
 
-- **Main Loop:**\
+- **Main Loop:**
   The `loop()` function remains empty, as the system relies on RTOS
   threads for ongoing tasks. All main logic thus resides in separate
   threads defined in the setup phase.
