@@ -133,6 +133,7 @@ void task2_function() {
                     Serial.println("Buffer is empty. Waiting for data.");
                 #endif
             }
+            ThisThread::sleep_for(100); // 100 ms
         } 
         T
     }ThisThread::sleep_for(1000); // 1 second
