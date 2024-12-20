@@ -329,47 +329,48 @@ system.
 
 #### Hardware Components
 
-1. **Microcontroller**:\
+1. **Microcontroller**:
+
    **Arduino Portenta H7** with built-in Wi-Fi capability and RTOS
-   support.\
-   Enables usage of threads for sensor data collection and
+   support. Enables usage of threads for sensor data collection and
    transmission.
 
-2. **IMU Sensor**:\
+2. **IMU Sensor**:
+
    **GY-521** with MPU6050 6DOF (3-Axis Gyro and 3-Axis
-   Accelerometer).\
-   While currently only the z-axis acceleration is used, the sensor
+   Accelerometer). While currently only the z-axis acceleration is used, the sensor
    provides additional data which can be used for future work to
    improve the road state qualification model.
 
-3. **GPS Module**:\
+3. **GPS Module**:
+
    **DFRobot GPS + BDS BeiDou** with output of position and speed.\
    We were able to fix connectivity by integrating EMF shielding. As
    the transmitted speed data was faulty, we had to make use of a
    fallback solution by approximating each segment through a fixed time
    of 3 seconds.
 
-4. **EMF Shielding**:\
+4. **EMF Shielding**:
+
    **DIY** using aluminum foil to shield the GPS module from
    electromagnetic interference.
 
-Detailed information on the pin connections for the sensors with the
-Arduino Portenta H7 can be found in Table
-[2.1](#tab:sensor_connections){reference-type="ref"
-reference="tab:sensor_connections"}.
+Detailed information on the pin connections for the sensors with the Arduino Portenta H7 can be found in the following table.
 
 **Sensor** **Portenta H7** **Description**
 
 ---
 
-**GY-521** VCC 3.3V Power supply (3.3V)
-2-4 GND GND Ground
-2-4 SDA SDA (Pin 11) I2C Data line (SDA)
-2-4 SCL SCL (Pin 12) I2C Clock line (SCL)
-**DFRobot GPS** VCC 3.3V Power supply (3.3V)
-2-4 GND GND Ground
-2-4 TX RX (Pin 13) Serial data transmit line (TX from GPS to RX on Portenta H7)
-2-4 RX TX (Pin 14) Serial data receive line (RX from GPS to TX on Portenta H7)
+| **Module**      | **Pin** | **Portenta H7 Pin** | **Description**                               |
+| --------------- | ------- | ------------------- | --------------------------------------------- |
+| **GY-521**      | VCC     | 3.3V                | Power supply (3.3V)                           |
+|                 | GND     | GND                 | Ground                                        |
+|                 | SDA     | SDA (Pin 11)        | I2C Data line (SDA)                           |
+|                 | SCL     | SCL (Pin 12)        | I2C Clock line (SCL)                          |
+| **DFRobot GPS** | VCC     | 3.3V                | Power supply (3.3V)                           |
+|                 | GND     | GND                 | Ground                                        |
+|                 | TX      | RX (Pin 13)         | Serial data transmit line (TX from GPS to RX) |
+|                 | RX      | TX (Pin 14)         | Serial data receive line (RX from GPS to TX)  |
 
 ## Prototype Embedded Firmware
 
