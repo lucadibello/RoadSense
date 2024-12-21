@@ -1,4 +1,4 @@
-# RoadSense: Healtier Roads, Safer Rides
+# 🚗 RoadSense: Healtier Roads, Safer Rides
 
 The **RoadSense** project represents an IoT-powered system for
 detecting and mapping road anomalies, such as potholes and uneven
@@ -8,28 +8,68 @@ detailed heatmap of road conditions. This data will be instrumental in
 optimizing road maintenance, enhancing driver safety, and providing
 real-time hazard alerts.
 
-The project aims to deliver a comprehensive solution for road condition
-monitoring by addressing key objectives across data collection,
-processing, visualization, and alerting. Specifically, the system will
-focus on:
+## RoadSense in action
 
-1. Designing a cost-effective IoT-based solution for detecting and
-   mapping road anomalies.
+<center>
+  <img src="./assets/images/roadsense_webapp_points.png" width="95%">
+  <figcaption>Point Quality Data Visualization</figcaption>
+</center>
 
-2. Measuring road bumpiness and issuing real-time alerts for hazardous
-   conditions.
+<center style="margin-bottom: 10px">
+  <img src="./assets/images/roadsense_webapp_heat.png" width="95%">
+  <figcaption>Heatmap Visualization (red = severe road conditions)</figcaption>
+</center>
 
-3. Providing a user-friendly interface for stakeholders to visualize
-   road conditions and manage alerts effectively.
+## Prototype Car
 
-4. Enhancing road condition accuracy through data collection from
-   multiple vehicles.
+| ![Prototype Car (Top View)](./assets/images/roadsense_rc_top.jpg) | ![Prototype Car (Side View)](./assets/images/roadsense_rc_side.jpg) |
+| :---------------------------------------------------------------: | :-----------------------------------------------------------------: |
+|                    _Prototype Car (top view)_                     |                     _Prototype Car (side view)_                     |
 
-In the following sections, we will delve into the system design of
-**RoadSense** project and explore the design choices, components, and
-technologies employed to achieve these objectives.
+### Hardware Components
 
-## Overview
+1. **Microcontroller**:
+
+   **Arduino Portenta H7** with built-in Wi-Fi capability and RTOS
+   support. Enables usage of threads for sensor data collection and
+   transmission.
+
+2. **IMU Sensor**:
+
+   **GY-521** with MPU6050 6DOF (3-Axis Gyro and 3-Axis
+   Accelerometer). While currently only the z-axis acceleration is used, the sensor
+   provides additional data which can be used for future work to
+   improve the road state qualification model.
+
+3. **GPS Module**:
+
+   **DFRobot GPS + BDS BeiDou** with output of position and speed.\
+   We were able to fix connectivity by integrating EMF shielding. As
+   the transmitted speed data was faulty, we had to make use of a
+   fallback solution by approximating each segment through a fixed time
+   of 3 seconds.
+
+4. **EMF Shielding**:
+
+   **DIY** using aluminum foil to shield the GPS module from
+   electromagnetic interference.
+
+Detailed information on the pin connections for the sensors with the Arduino Portenta H7 can be found in the following table.
+
+**Sensor** **Portenta H7** **Description**
+
+---
+
+| **Module**      | **Pin** | **Portenta H7 Pin** | **Description**                               |
+| --------------- | ------- | ------------------- | --------------------------------------------- |
+| **GY-521**      | VCC     | 3.3V                | Power supply (3.3V)                           |
+|                 | GND     | GND                 | Ground                                        |
+|                 | SDA     | SDA (Pin 11)        | I2C Data line (SDA)                           |
+|                 | SCL     | SCL (Pin 12)        | I2C Clock line (SCL)                          |
+| **DFRobot GPS** | VCC     | 3.3V                | Power supply (3.3V)                           |
+|                 | GND     | GND                 | Ground                                        |
+|                 | TX      | RX (Pin 13)         | Serial data transmit line (TX from GPS to RX) |
+|                 | RX      | TX (Pin 14)         | Serial data receive line (RX from GPS to TX)  |
 
 ## Overview
 
@@ -63,9 +103,9 @@ The **RoadSense** system consists of the following components:
   <figcaption>RT-UML of a Sensor Node</figcaption>
 </center>
 
-#### Main Design Aspects
+### Main Design Aspects
 
-1. **Cost Restriction per node**:  100 CHF\
+1. **Cost Restriction per node**:  100 CHF
    Given the large number of vehicles that will host sensor nodes, the
    cost per node must remain as low as possible. To achieve this, each
    vehicle will have a single sensor node/package installed to minimize
@@ -84,10 +124,7 @@ The **RoadSense** system consists of the following components:
 3. **Qualification Model**:
 
    $$
-   \begin{aligned}
-            \text{RoadQuality}_i =  \lfloor \frac{max(\Delta a_{z,t}) - \Delta a_{z,\text{min}}}{\Delta a_{z,\text{max}} - \Delta a_{z,\text{min}}} \rfloor  \cdot 255 \quad \text{where} \quad  t \in \text{RoadSegment}_i
-
-   \end{aligned}
+   \text{RoadQuality}_i =  \left\lfloor \frac{\max(\Delta a_{z,t}) - \Delta a_{z,\min}}{\Delta a_{z,\max} - \Delta a_{z,\min}} \right\rfloor  \cdot 255 \quad \text{where} \quad  t \in \text{RoadSegment}_i
    $$
 
    This model is based on the assumption that the maximum acceleration
@@ -98,9 +135,11 @@ The **RoadSense** system consists of the following components:
    $\Delta a_{z,\text{max}}$ are determined during the calibration
    phase and symbolize the minimum and maximum acceleration difference
    occurring during possible driving conditions. This makes the model
-   adaptable to different vehicles and driving conditions.\
+   adaptable to different vehicles and driving conditions.
+
    Future iterations will adapt a simulation based approach described
-   in the following:\
+   in the following:
+
    A simple linear Mass-Spring-Damper Model is chosen to model the cars
    factor on the transduced shocks. (While keeping computational effort
    low.) A first calibration phase coupled to a initial parameter set
@@ -110,7 +149,8 @@ The **RoadSense** system consists of the following components:
    considered to decouple driving induced accelerations from the road
    state.
 
-4. **High Polling Rate for IMU Measurements**:\
+4. **High Polling Rate for IMU Measurements**:
+
    Road-induced shocks are brief and their period and amplitude are
    proportional to vehicle speed. The IMU's polling rate will be
    configured to ensure reliable readings for typical driving speeds.
@@ -129,19 +169,19 @@ The **RoadSense** system consists of the following components:
 
    3. **Driving Velocity** to approximate relative distance through
       integration needed for velocity indipendent Segmentation of
-      QualityMeasures.\
+      QualityMeasures.
       (Future Work: to couple shock amplitudes to velocity through
       Spring-Damper Model).
 
    4. **Geographical Position** to reference qualification to current
       position.
 
-6. **Data Transmission at Established Gatepoints**:\
+6. **Data Transmission at Established Gatepoints**:
 
    1. **Data Format**: Each data package will include the following
       information encoded as a JSON object:
 
-      ```{breaklines="true" basicstyle="\ttfamily"}
+      ```
       (Node ID (2 Bytes)) |
        Position (2 x 8 Bytes (Double-Precision Float)) | Road Quality (1 Byte) | Unix Timestamp (4 Bytes)
       ```
@@ -177,7 +217,7 @@ scalable to handle data from thousands of devices. In this section we
 will describe all meaningful components of the system, focusing on the
 IoT data pipeline and the client-server architecture.
 
-### IoT Data Pipeline {#subsec:iot_data_pipeline}
+### IoT Data Pipeline
 
 The data pipeline has been designed with scalability in mind, allowing
 for efficient data collection, processing, and data analysis from
@@ -274,7 +314,7 @@ following diagram illustrates the client-server interaction:
 
 <center style="margin-bottom: 10px">
 ![Client-Server
-  <img src="../../assets/diagrams/client_server_architecture/client_server_arch.png" width="100%">
+  <img src="./assets/diagrams/client_server_architecture/client_server_arch.png" width="100%">
   <figcaption>Client-Server interaction</figcaption>
 </center>
 
@@ -314,63 +354,6 @@ This chapter provides detailed insights into the implementation of these
 components, explaining the choices of technologies and methodologies
 employed to achieve the desired functionality and performance of the
 system.
-
-## Prototype Car
-
-<center>
-  <img src="./assets/images/roadsense_rc_top.jpg" width="70%">
-  <figcaption>Prototype Car with Sensor Node (top view)</figcaption>
-</center>
-
-<center>
-  <img src="./assets/images/roadsense_rc_side.jpg" width="70%">
-  <figcaption>Prototype Car with Sensor Node (side view)</figcaption>
-</center>
-
-#### Hardware Components
-
-1. **Microcontroller**:
-
-   **Arduino Portenta H7** with built-in Wi-Fi capability and RTOS
-   support. Enables usage of threads for sensor data collection and
-   transmission.
-
-2. **IMU Sensor**:
-
-   **GY-521** with MPU6050 6DOF (3-Axis Gyro and 3-Axis
-   Accelerometer). While currently only the z-axis acceleration is used, the sensor
-   provides additional data which can be used for future work to
-   improve the road state qualification model.
-
-3. **GPS Module**:
-
-   **DFRobot GPS + BDS BeiDou** with output of position and speed.\
-   We were able to fix connectivity by integrating EMF shielding. As
-   the transmitted speed data was faulty, we had to make use of a
-   fallback solution by approximating each segment through a fixed time
-   of 3 seconds.
-
-4. **EMF Shielding**:
-
-   **DIY** using aluminum foil to shield the GPS module from
-   electromagnetic interference.
-
-Detailed information on the pin connections for the sensors with the Arduino Portenta H7 can be found in the following table.
-
-**Sensor** **Portenta H7** **Description**
-
----
-
-| **Module**      | **Pin** | **Portenta H7 Pin** | **Description**                               |
-| --------------- | ------- | ------------------- | --------------------------------------------- |
-| **GY-521**      | VCC     | 3.3V                | Power supply (3.3V)                           |
-|                 | GND     | GND                 | Ground                                        |
-|                 | SDA     | SDA (Pin 11)        | I2C Data line (SDA)                           |
-|                 | SCL     | SCL (Pin 12)        | I2C Clock line (SCL)                          |
-| **DFRobot GPS** | VCC     | 3.3V                | Power supply (3.3V)                           |
-|                 | GND     | GND                 | Ground                                        |
-|                 | TX      | RX (Pin 13)         | Serial data transmit line (TX from GPS to RX) |
-|                 | RX      | TX (Pin 14)         | Serial data receive line (RX from GPS to TX)  |
 
 ## Prototype Embedded Firmware
 
