@@ -43,7 +43,7 @@ real-time hazard alerts.
 
 3. **GPS Module**:
 
-   **DFRobot GPS + BDS BeiDou** with output of position and speed.\
+   **DFRobot GPS + BDS BeiDou** with output of position and speed.
    We were able to fix connectivity by integrating EMF shielding. As
    the transmitted speed data was faulty, we had to make use of a
    fallback solution by approximating each segment through a fixed time
@@ -195,7 +195,7 @@ The **RoadSense** system consists of the following components:
         "lon": 6.80421,
         "timestamp": 1734478933,
         "bumpiness": 50,
-        "device_id": "USI-Car-1""
+        "device_id": "USI-Car-1"
       }
       ```
 
@@ -583,7 +583,7 @@ additional features such as message acknowledgments and routing. The
 following diagram illustrated the flow of data through the prototype
 pipeline:
 
-<center style="backgroud-color: white">
+<center style="background-color: white">
   <img
   src="./assets/diagrams/prototype_pipeline/prototype_pipeline_annotated.png"
   style="width:95.0%" />
