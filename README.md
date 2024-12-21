@@ -675,8 +675,6 @@ incorporate advanced features such as user authentication,
 geographical-based routing, and deployment in a containerized, clustered
 environment.
 
-# Results and Conclusions
-
 ## Results
 
 The **RoadSense** system was successfully implemented and tested in a
