@@ -226,8 +226,7 @@ diagram illustrates the pipeline steps, from data ingestion to the
 storage of processed data.
 
 <center style="margin-bottom: 10px">
-![IoT Data
-  <img src="../../assets/diagrams/iot_data_pipeline/iot_data_pipeline.png" width="100%">
+  <img src="./assets/diagrams/iot_data_pipeline/iot_data_pipeline.png" width="100%">
   <figcaption>IoT Data Pipeline Architecture</figcaption>
 </center>
 
