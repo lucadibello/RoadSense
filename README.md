@@ -583,12 +583,13 @@ additional features such as message acknowledgments and routing. The
 following diagram illustrated the flow of data through the prototype
 pipeline:
 
-<center style="margin-bottom: 10px">
+<center style="backgroud-color: white">
   <img
   src="./assets/diagrams/prototype_pipeline/prototype_pipeline_annotated.png"
   style="width:95.0%" />
-  <figcaption>Prototype Data Processing Pipeline with
-  Annotations</figcaption>
+</center>
+<center style="margin-bottom: 10px">
+  <figcaption>Prototype Data Processing Pipeline with Annotations</figcaption>
 </center>
 
 This simplified implementation allows for faster prototyping and
