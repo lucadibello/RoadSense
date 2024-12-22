@@ -123,9 +123,7 @@ The **RoadSense** system consists of the following components:
 
 3. **Qualification Model**:
 
-   $$
-   \text{RoadQuality}_i =  \left\lfloor \frac{\max(\Delta a_{z,t}) - \Delta a_{z,\min}}{\Delta a_{z,\max} - \Delta a_{z,\min}} \right\rfloor  \cdot 255 \quad \text{where} \quad  t \in \text{RoadSegment}_i
-   $$
+   $q_i = \lfloor \frac{\max(\Delta a_{z,t}) - \Delta a_{z,\min}}{\Delta a_{z,\max} - \Delta a_{z,\min}} \rfloor \cdot 255 \quad \text{where} \quad t \in \text{RoadSegment}_i$
 
    This model is based on the assumption that the maximum acceleration
    in z-axis is proportional to the road quality. By calculating the
@@ -312,7 +310,6 @@ of samples without overwhelming either the client or the server. The
 following diagram illustrates the client-server interaction:
 
 <center style="margin-bottom: 10px">
-![Client-Server
   <img src="./assets/diagrams/client_server_architecture/client_server_arch.png" width="100%">
   <figcaption>Client-Server interaction</figcaption>
 </center>
@@ -583,13 +580,11 @@ additional features such as message acknowledgments and routing. The
 following diagram illustrated the flow of data through the prototype
 pipeline:
 
-<div style="background-color: white">
-  <center style="background-color: white">
+  <center>
     <img
     src="./assets/diagrams/prototype_pipeline/prototype_pipeline_annotated.png"
     style="width:95.0%" />
   </center>
-</div>
 
 <center style="margin-bottom: 10px">
   <figcaption>Prototype Data Processing Pipeline with Annotations</figcaption>
